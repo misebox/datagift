@@ -31,6 +31,7 @@ def handler(event, context):
         "body": json.dumps(
             {
                 "message": "hello world",
+                "path": event.get('path'),
                 "event": event,
                 "context": ctx,
             }
