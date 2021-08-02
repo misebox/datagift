@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set -eux
+
+aws cloudformation validate-template \
+  --template-body file://cf-templates/web.yaml
+
 aws cloudformation create-stack \
   --stack-name datagift-web-stack \
   --template-body file://cf-templates/web.yaml

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -eux
+aws cloudformation validate-template \
+  --template-body file://cf-templates/api.yaml
+
+aws cloudformation create-stack \
+  --stack-name datagift-api-stack \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --template-body file://cf-templates/api.yaml \
+  --parameters \
+    ParameterKey=EnvMode,ParameterValue="${API_ENV_MODE}"
+
+
