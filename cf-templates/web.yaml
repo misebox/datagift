@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 
+  S3 and CloudFront for Static website hosting using OAI
+Mappings:
+  Vars:
+    Dev:
+      Name: "datagift"
+      WebBucketName: datagift-web
+      LogBucketName: datagift-log
+Resources:
+  LogBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !FindInMap ['Vars', 'Dev', 'LogBucketName']
+      AccessControl: LogDeliveryWrite
+
+  WebBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !FindInMap ['Vars', 'Dev', 'WebBucketName']
+      # VersioningConfiguration:
+      #   Status: Enabled
+      # LifecycleConfiguration:
+      #   Rules:
+      #     - Id: NoncurrentVersionExpiration
+      #       Status: Enabled
+      #       NoncurrentVersionExpirationInDays: 7
+      LoggingConfiguration:
+        DestinationBucketName: !Ref LogBucket
+        LogFilePrefix: s3-accesslog/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        # ErrorDocument: 404.html
+      Tags:
+        - Key: CloudFormationArn
+          Value: !Sub '${AWS::StackName}'
+  WebBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebBucket
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Join ['', ['arn:aws:s3:::', !Ref WebBucket, '/*']]
+            Principal:
+              CanonicalUser: !GetAtt CloudFrontOriginAccessIdentity.S3CanonicalUserId
+
+  TheDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+        - Id: S3Origin
+          DomainName: !GetAtt WebBucket.DomainName
+          S3OriginConfig:
+            OriginAccessIdentity:
+              !Join ['', ['origin-access-identity/cloudfront/', !Ref CloudFrontOriginAccessIdentity]]
+        Enabled: true
+        DefaultRootObject: index.html
+        Comment: !Sub ${AWS::StackName}
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          Compress: true
+          DefaultTTL: 86400
+          ForwardedValues:
+            QueryString: true
+          MaxTTL: 31536000
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+        Logging:
+            Bucket: !GetAtt LogBucket.DomainName
+            Prefix: cloudfront-accesslog/
+        HttpVersion: http2
+        IPV6Enabled: false
+        PriceClass: PriceClass_200
+      Tags:
+        - Key: CloudFormationArn
+          Value: !Sub '${AWS::StackName}'
+
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref AWS::StackName
+
+Outputs:
+  URL:
+    Value: !Join [ "", [ "https://", !GetAtt [ TheDistribution, DomainName ]]]
+

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+aws cloudformation create-stack \
+  --stack-name datagift-web-stack \
+  --template-body file://cf-templates/web.yaml
+
