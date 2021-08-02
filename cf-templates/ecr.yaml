@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ECR Repository for Lambda
+
+Mappings:
+  Vars:
+    Dev:
+      Name: "datagift"
+      RepositoryName: 'datagift/restapi-dev'
+
+Resources:
+  ECRRepository:
+    Type: AWS::ECR::Repository
+    Properties: 
+      EncryptionConfiguration:
+        EncryptionType: AES256
+      ImageScanningConfiguration:
+        ScanOnPush: false
+      ImageTagMutability: MUTABLE
+      RepositoryName: !FindInMap [Vars, Dev, RepositoryName]
+      RepositoryPolicyText: >
+        { "Version": "2012-10-17",
+          "Statement": [
+            { "Sid": "CodeBuildAccess",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "codebuild.amazonaws.com",
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "ecr:BatchGetImage",
+                "ecr:GetDownloadUrlForLayer"
+              ]
+            }
+          ]
+        }
+      Tags:
+        - Key: CloudFormationArn
+          Value: !Sub '${AWS::StackName}'
+
+Outputs:
+  DataGiftECRRepositoryUri:
+    Description: "Image URI for DataGift function"
+    Value: !GetAtt ECRRepository.RepositoryUri
