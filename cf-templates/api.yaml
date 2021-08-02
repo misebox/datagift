@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda with image for API
+Parameters:
+  EnvMode:
+    Type: String
+    Default: dev
+    AllowedValues: [test, dev, prod]
+    Description: Environment Mode(test|dev|prod)
+
+Mappings:
+  Vars:
+    Dev:
+      Name: "datagift"
+      RepositoryName: 'datagift/restapi-dev'
+      LambdaName: 'datagift-lambda'
+
+Resources:
+
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess'
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaDynamoDBExecutionRole'
+        # TODO: make this policy minimal
+      MaxSessionDuration: 3600
+      Path: '/'
+      RoleName: datagift-lambda-execution-role
+      Tags:
+        - Key: CloudFormationArn
+          Value: !Sub '${AWS::StackName}'
+
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties: 
+      Code:
+        ImageUri: !Sub
+          - '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${RepositoryName}:latest'
+          - {RepositoryName: !FindInMap [Vars, Dev, RepositoryName]}
+      Description: Lambda with image for API
+      FunctionName: !FindInMap [Vars, Dev, LambdaName]
+      MemorySize: 128
+      PackageType: Image
+      Role: !GetAtt [LambdaExecutionRole, Arn]
+      Timeout: 5
+      # DeadLetterConfig: 
+      #   DeadLetterConfig
+      Environment: 
+        Variables:
+          ENV_MODE: !Ref EnvMode
+      Tags:
+        - Key: CloudFormationArn
+          Value: !Sub '${AWS::StackName}'
+
+Outputs:
+  #DataGiftApi:
+  #  Description: "API Gateway endpoint URL for Prod stage for DataGift function"
+  #  Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  DataGiftFunctionArn:
+    Description: "DataGift Lambda Function ARN"
+    Value: !GetAtt LambdaFunction.Arn
+  DataGiftLambdaExecutionRoleArn:
+    Description: "Implicit IAM Role created for DataGift function"
+    Value: !GetAtt LambdaExecutionRole.Arn
+
+
