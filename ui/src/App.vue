@@ -1,5 +1,8 @@
 <template>
-  <HelloWorld msg="Hello Vue 3 + Vite datagift" />
+  <div>
+    <img src="/favicon.ico">
+    <router-view></router-view>
+  </div>
 </template>
 
 <script setup>
