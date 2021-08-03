@@ -1,0 +1,145 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Cognito Identity Pool and User Pool."
+Parameters:
+  EmailIdentityArn:
+    Type: String
+Mappings:
+  Vars:
+    Dev:
+      Name: "datagift"
+      UserPoolName: 'datagift-userpool'
+      UserPoolClientName: 'datagift-userpool-client'
+      IdentityPoolName: 'datagift-identitypool'
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !FindInMap [Vars, Dev, UserPoolName]
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      AliasAttributes:
+      - email
+      - preferred_username
+      AutoVerifiedAttributes:
+      - email
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+        # TODO: to use SourceArn, an EmailIdentty in US or EU region is required
+        # SourceArn: !Ref EmailIdentityArn
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+      Schema:
+      - Name: email
+        AttributeDataType: String
+        DeveloperOnlyAttribute: false
+        Mutable: true
+        Required: true
+      - Name: preferred_username
+        AttributeDataType: String
+        DeveloperOnlyAttribute: false
+        Mutable: true
+        Required: false
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !FindInMap [Vars, Dev, UserPoolClientName]
+      GenerateSecret: false
+      RefreshTokenValidity: 7
+      UserPoolId: !Ref UserPool
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: true
+      IdentityPoolName: !FindInMap [Vars, Dev, IdentityPoolName]
+      CognitoIdentityProviders:
+      - ClientId: !Ref UserPoolClient
+        ProviderName: !Sub 'cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
+  UnauthenticatedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+          - mobileanalytics:PutEvents
+          - cognito-sync:*
+          Resource:
+          - "*"
+  UnauthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action: "sts:AssumeRoleWithWebIdentity"
+          Principal:
+            Federated: cognito-identity.amazonaws.com
+          Condition:
+            StringEquals:
+              "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+            ForAnyValue:StringLike:
+              "cognito-identity.amazonaws.com:amr": unauthenticated
+      ManagedPolicyArns:
+      - !Ref UnauthenticatedPolicy
+  AuthenticatedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+          - mobileanalytics:PutEvents
+          - cognito-sync:*
+          - cognito-identity:*
+          Resource:
+          - "*"
+  AuthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action: "sts:AssumeRoleWithWebIdentity"
+          Principal:
+            Federated: cognito-identity.amazonaws.com
+          Condition:
+            StringEquals:
+              "cognito-identity.amazonaws.com:aud": !Ref IdentityPool
+            ForAnyValue:StringLike:
+              "cognito-identity.amazonaws.com:amr": authenticated
+      ManagedPolicyArns:
+      - !Ref AuthenticatedPolicy
+  RoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId: !Ref IdentityPool
+      Roles:
+        unauthenticated:
+          Fn::GetAtt:
+          - UnauthenticatedRole
+          - Arn
+        authenticated:
+          Fn::GetAtt:
+          - AuthenticatedRole
+          - Arn
+Outputs:
+  UserPool:
+    Value: !Ref UserPool
+  UserPoolClient:
+    Value: !Ref UserPoolClient
+  IdentityPool:
+    Value: !Ref IdentityPool
+  UnauthenticatedRole:
+    Value: !Ref UnauthenticatedRole
+  AuthenticatedRole:
+    Value: !Ref AuthenticatedRole
