@@ -1,0 +1,21 @@
+{
+  "folders": [
+    {
+      "name": "Shellscripts",
+      "path": "bin"
+    },
+    {
+      "name": "CloudFormation Templates",
+      "path": "cf-templates"
+    },
+    {
+      "name": "Lambda",
+      "path": "lambda"
+    },
+    {
+      "name": "UI",
+      "path": "ui"
+    }
+  ],
+  "settings": {}
+}
