@@ -7,13 +7,16 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "aws-amplify": "4.2.3-unstable.2",
+    "axios": "0.21.1",
     "vue": "3.1.5",
-    "vue-router": "4.0.10"
+    "vue-router": "4.0.10",
+    "vuex": "4.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "1.2.5",
     "@vue/compiler-sfc": "3.1.5",
-    "eslint-plugin-vue": "^7.15.1",
+    "eslint-plugin-vue": "7.15.1",
     "vite": "2.4.3"
   }
 }
