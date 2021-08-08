@@ -23,18 +23,16 @@ const router = VueRouter.createRouter({
 
 router.beforeEach((to, from, next) => {
   console.log(to);
-  if (to.query.clear) {
-    return
-  }
   if (to.query.code && to.query.state) {
     const {code, state} = to.query;
     store.dispatch('auth/authorizeCode', {code})
     next({query: null})
     return
-  } else {
-    store.dispatch('auth/tryGetTokens');
-    next()
   }
+  if (!store.getters['auth/isLoggedIn']) {
+    store.dispatch('auth/tryGetTokens')
+  }
+  next()
 });
 router.afterEach((to, from) => {
 });

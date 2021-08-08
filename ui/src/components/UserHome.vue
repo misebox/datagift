@@ -39,7 +39,7 @@ defineProps({
 const state = reactive({
   count: 0,
 })
-const isLoggedIn = computed(() => store.getters['auth/isLoggedIn'])
+const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
 const items = computed(() => store.getters['gift/getItems'])
 
 function clickLogin() {

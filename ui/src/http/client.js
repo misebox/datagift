@@ -1,4 +1,3 @@
-import config from '@/config'
 import {fixedEncodeURIComponent} from '@/utils.js';
 
 function request(url, {
@@ -10,6 +9,33 @@ function request(url, {
   referrerPolicy='strict-origin-when-cross-origin',
   ...others
 }) {
+  if (others.queryParams) {
+    // consume params
+    const queryParams = others.queryParams || {};
+    const query = Object.entries(queryParams).map(([k, v]) => ([k, fixedEncodeURIComponent(v)].join('='))).join('&');
+    if (query) {
+      url += '?' + query;
+    }
+    delete others.queryParams;
+  }
+
+  if (others.jsonParams) {
+    // consume json
+    others.headers ||= {}
+    others.headers['Content-Type'] ||= 'application/json'
+    others.body = JSON.stringify(others.jsonParams)
+    delete others.jsonParams;
+  } else if (others.bodyParams) {
+    // consume bodyParams
+    others.headers ||= {}
+    others.headers['Content-Type'] ||= 'application/x-www-form-urlencoded';
+    const bodyParams = new URLSearchParams();
+    Object.entries(others.bodyParams).map(([k, v]) => {
+      bodyParams.append(k, v)
+    });
+    others.body = bodyParams
+    delete others.bodyParams;
+  }
   return new Promise((resolve, reject) => {
     fetch(url, {
       method,
@@ -44,27 +70,13 @@ function request(url, {
 }
 
 export default {
-  get: async function(url, params={}, options={}) {
-    const query = Object.entries(params).map(([k, v]) => ([k, fixedEncodeURIComponent(v)].join('='))).join('&');
-    if (query) {
-      url += '?' + query;
-    }
+  get: async function(url, options={}) {
     return await request(url, {...options, method: 'GET'});
   },
-  post: async function (url, data = {}, options={}) {
-    const body = (
-      options &&
-      options.headers &&
-      options.headers['Content-Type'] === 'application/json'
-    ) ? JSON.stringify(data)
-      : data;
+  post: async function (url, options={}) {
     return await request(url, {
       method: 'POST',
       cache: 'no-cache',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body,
       ...options,
     });
   }

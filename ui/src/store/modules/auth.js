@@ -1,19 +1,9 @@
-import router from '@/router.js'
 import http from '@/http'
-import awsconfig from '@/aws-exports'
-import config from '@/config'
 import {
   getRandomString,
   generateCodeChallenge,
-  buildUrl,
 } from '@/utils'
 
-
-const AWS_AUTHORIZATION_ENDPOINT = 'https://' + awsconfig.Auth.oauth.domain + '/oauth2/authorize';
-const AWS_HOSTED_UI_ENDPOINT = 'https://' + awsconfig.Auth.oauth.domain + '/login';
-const AWS_TOKEN_ENDPOINT = 'https://' + awsconfig.Auth.oauth.domain + '/oauth2/token';
-const AWS_LOGOUT_ENDPOINT = 'https://' + awsconfig.Auth.oauth.domain + '/logout';
-const API_BASEURL = import.meta.env.VITE_API_BASEURL
 
 const state = {
   idToken: '',
@@ -22,12 +12,10 @@ const state = {
 };
 
 const getters = {
-  isLoggedIn() {
-    return !!state.accessToken
-  },
-  idToken: () => (state.idToken),
-  accessToken: () => (state.accessToken),
-  refreshToken: () => (state.refreshToken),
+  isLoggedIn: state => !!state.idToken,
+  idToken: state => state.idToken,
+  accessToken: state => state.accessToken,
+  refreshToken: state => state.refreshToken,
 };
 const mutations = {
   setTokens(state, payload) {
@@ -40,7 +28,6 @@ const mutations = {
 
 
 const actions = {
-
   jumpToAuthorize() {
     const codeVerifier = getRandomString(16);
     generateCodeChallenge(codeVerifier)
@@ -52,19 +39,12 @@ const actions = {
         codeVerifier,
       };
       window.sessionStorage.setItem('authInfo', JSON.stringify(authInfo))
-      const params = {
-        response_type: awsconfig.Auth.oauth.responseType,
-        client_id: awsconfig.Auth.userPoolWebClientId,
-        redirect_uri: awsconfig.Auth.oauth.redirectSignIn,
-        scope: 'email+openid+profile',
+      const queryParams = {
         state: authInfo.state,
         code_challenge_method: authInfo.codeChallengeMethod,
         code_challenge: authInfo.codeChallenge,
       };
-
-      const url = buildUrl(AWS_HOSTED_UI_ENDPOINT, params);
-      console.log('url', url)
-      window.location.href = url;
+      http.navigator.login(queryParams);
     })
   },
   authorizeCode(ctx, {code}) {
@@ -73,54 +53,30 @@ const actions = {
       ctx.dispatch('logout')
       return
     }
-    const data = {
-      grant_type: 'authorization_code',
-      client_id: awsconfig.Auth.userPoolWebClientId,
+    const bodyParams = {
       code,
       code_verifier: authInfo.codeVerifier,
-      redirect_uri: awsconfig.Auth.oauth.redirectSignIn,
     };
-    const params = new URLSearchParams();
-    Object.entries(data).map(([k, v]) => {
-      params.append(k, v)
-    });
-    const headers = {'Content-Type': 'application/x-www-form-urlencoded'};
-    http.post(AWS_TOKEN_ENDPOINT, params, {headers})
-    .then((res) => (res.json()))
-    .catch((res) => {
-      ctx.dispatch('logout')
-    }).then((tokens) => {
+    http.rest.authorizeCode({...bodyParams})
+    .then((tokens) => {
       ctx.commit('setTokens', tokens)
       window.sessionStorage.setItem('tokens', JSON.stringify(tokens))
     })
-  },
-  loginWithCode(ctx, {code}) {
-    http.post(API_BASEURL + '/hello', {
-      param1: 'sample'
-    }).then(res => {
-      console.log(res.json())
-    })
-
+    .catch((res) => {
+      ctx.dispatch('logout')
+    });
   },
   logout() {
     console.log('LOGOUT')
     window.sessionStorage.removeItem('tokens');
     window.sessionStorage.removeItem('authInfo');
-    const params = {
-      client_id: config.auth.USER_POOL_CLIENT_ID,
-      logout_uri: config.auth.REDIRECT_SIGNOUT,
-    };
-    location.href = buildUrl(AWS_LOGOUT_ENDPOINT, params);
+    http.navigator.logout()
   },
   tryGetTokens(ctx) {
     let item;
     if (item = window.sessionStorage.getItem('tokens')) {
       const tokens = JSON.parse(item);
       ctx.commit('setTokens', tokens)
-    }
-    if (item = window.sessionStorage.getItem('authInfo')) {
-      const authInfo = JSON.parse(item);
-      ctx.dispatch('authorizeCode', authInfo)
     }
   }
 }
