@@ -1,25 +1,62 @@
 <template>
-  <h1>User Home</h1>
+  <div>
+    <h1>User Home</h1>
 
-  <p>
-  </p>
+    <p>
+    </p>
+    <div v-show="!isLoggedIn">
+      <button type="button" @click="clickLogin">Login</button>
+    </div>
+    <div v-show="isLoggedIn">
+      <button type="button" @click="clickLogout">Logout</button>
+      <p>
+        <button type="button" @click="clickList">LIST</button>
+      </p>
+      <p>
+        <button type="button" @click="clickGetBucket">GET</button>
+      </p>
+    </div>
+  </div>
 
 </template>
 
 <script setup>
-import { reactive, onMounted } from 'vue'
+import {
+  reactive,
+  onMounted,
+  computed,
+  ref,
+} from 'vue'
+import { useStore } from 'vuex'
 import { useRoute } from 'vue-router'
+
+const store = useStore();
 
 defineProps({
   msg: String
 })
 
-const state = reactive({ count: 0 })
+const state = reactive({
+  count: 0,
+})
+const isLoggedIn = computed(() => store.getters['auth/isLoggedIn'])
+const items = computed(() => store.getters['gift/getItems'])
 
+function clickLogin() {
+  store.dispatch('auth/jumpToAuthorize')
+};
+function clickLogout() {
+  store.dispatch('auth/logout')
+};
+function clickList() {
+  store.dispatch('gift/getItems')
+};
+function clickGetBucket() {
+  store.dispatch('gift/get')
+};
 const currentRoute = useRoute();
 onMounted(()=>{
   const {name, meta, fullPath, params, query} = currentRoute;
-  console.log('(currentRoute)', name, fullPath, meta, params, query)
 })
 </script>
 
