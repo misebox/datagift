@@ -9,19 +9,26 @@ const state = {
   idToken: '',
   accessToken: '',
   refreshToken: '',
+  expiresAt: null,
 };
 
 const getters = {
-  isLoggedIn: state => !!state.idToken,
-  idToken: state => state.idToken,
-  accessToken: state => state.accessToken,
-  refreshToken: state => state.refreshToken,
+  isLoggedIn: state => (!!state.idToken),
+  idToken: state => (state.idToken),
+  accessToken: state => (state.accessToken),
+  refreshToken: state => (state.refreshToken),
+  expiresAt: state => (state.expiresAt),
 };
 const mutations = {
   setTokens(state, payload) {
-    state.accessToken = payload.access_token;
-    state.refreshToken = payload.refresh_token;
     state.idToken = payload.id_token;
+    state.accessToken = payload.access_token;
+    if (payload.refresh_token) {
+      state.refreshToken = payload.refresh_token;
+    }
+    if (payload.expires_in) {
+      state.expiresAt = new Date((new Date()).getTime() + payload.expires_in * 1000)
+    }
     window.sessionStorage.removeItem('authInfo')
   },
 };
@@ -53,18 +60,26 @@ const actions = {
       ctx.dispatch('logout')
       return
     }
-    const bodyParams = {
+    const formParams = {
       code,
       code_verifier: authInfo.codeVerifier,
     };
-    http.rest.authorizeCode({...bodyParams})
+    http.rest.authorizeCode(formParams)
     .then((tokens) => {
       ctx.commit('setTokens', tokens)
-      window.sessionStorage.setItem('tokens', JSON.stringify(tokens))
     })
     .catch((res) => {
       ctx.dispatch('logout')
     });
+  },
+  refreshToken(ctx) {
+    const params = {
+      refresh_token: ctx.getters['refreshToken']
+    };
+    http.rest.refreshToken(params)
+    .then(data => {
+      ctx.commit('setTokens', data)
+    })
   },
   logout() {
     console.log('LOGOUT')

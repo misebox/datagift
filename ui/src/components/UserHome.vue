@@ -8,6 +8,7 @@
       <button type="button" @click="clickLogin">Login</button>
     </div>
     <div v-show="isLoggedIn">
+      <button type="button" @click="clickRefresh">Refresh</button>
       <button type="button" @click="clickLogout">Logout</button>
       <p>
         <button type="button" @click="clickList">LIST</button>
@@ -44,16 +45,19 @@ const items = computed(() => store.getters['gift/getItems'])
 
 function clickLogin() {
   store.dispatch('auth/jumpToAuthorize')
-};
+}
+function clickRefresh() {
+  store.dispatch('auth/refreshToken')
+}
 function clickLogout() {
   store.dispatch('auth/logout')
-};
+}
 function clickList() {
   store.dispatch('gift/getItems')
-};
+}
 function clickGetBucket() {
   store.dispatch('gift/get')
-};
+}
 const currentRoute = useRoute();
 onMounted(()=>{
   const {name, meta, fullPath, params, query} = currentRoute;

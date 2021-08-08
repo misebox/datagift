@@ -29,9 +29,6 @@ router.beforeEach((to, from, next) => {
     next({query: null})
     return
   }
-  if (!store.getters['auth/isLoggedIn']) {
-    store.dispatch('auth/tryGetTokens')
-  }
   next()
 });
 router.afterEach((to, from) => {

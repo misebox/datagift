@@ -1,12 +1,13 @@
 import {fixedEncodeURIComponent} from '@/utils.js';
+import store from '@/store'
 
 function request(url, {
   method,
   mode='cors',
   cache='no-cache',
-  credentials='same-origin',
-  redirect='follow',
-  referrerPolicy='strict-origin-when-cross-origin',
+  //credentials='same-origin',
+  //redirect='follow',
+  //referrerPolicy='strict-origin-when-cross-origin',
   ...others
 }) {
   if (others.queryParams) {
@@ -25,46 +26,48 @@ function request(url, {
     others.headers['Content-Type'] ||= 'application/json'
     others.body = JSON.stringify(others.jsonParams)
     delete others.jsonParams;
-  } else if (others.bodyParams) {
-    // consume bodyParams
+  } else if (others.formParams) {
+    // consume formParams
     others.headers ||= {}
     others.headers['Content-Type'] ||= 'application/x-www-form-urlencoded';
-    const bodyParams = new URLSearchParams();
-    Object.entries(others.bodyParams).map(([k, v]) => {
-      bodyParams.append(k, v)
+    const formParams = new URLSearchParams();
+    Object.entries(others.formParams).map(([k, v]) => {
+      formParams.append(k, v)
     });
-    others.body = bodyParams
-    delete others.bodyParams;
+    others.body = formParams
+    delete others.formParams;
   }
   return new Promise((resolve, reject) => {
-    fetch(url, {
+    const fixedOptions = {
       method,
       mode,
       cache,
-      credentials,
-      redirect,
-      referrerPolicy,
+      //credentials,
+      //redirect,
+      //referrerPolicy,
       ...others
-    })
+    };
+    fetch(url, fixedOptions)
     .then(response => {
-      if (response.ok) {
-        resolve(response)
+      if (!response.ok) {
+        if (response.status === 401) {
+          const args = arguments;
+          store.dispatch('auth/refreshToken')
+        }
+        response.json()
+        .then(err => {
+          throw new Error(err);
+        })
+        .catch(err => {
+          throw new Error(err);
+        })
       } else {
-        reject(response);
-        //response.json()
-        //  .then(data => {
-        //    const errors = (
-        //      data.detail
-        //      ? (Array.isArray(data.detail) && (data.detail.length > 0)
-        //        ? (typeof data.detail[0] === 'string'
-        //          ? data.detail.map(err => ({msg: err}))
-        //          : data.detail)
-        //        : [{msg: data.detail}])
-        //      : [{msg: 'Something wrong'}]
-        //    );
-        //  })
-        //  .catch(() => ([{msg: 'Something wrong'}]));
+        resolve(response)
       }
+    })
+    .catch(err => {
+      console.error(err.name, err.message)
+
     });
   });
 }
