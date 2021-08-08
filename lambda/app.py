@@ -1,6 +1,9 @@
 import json
 import boto3
 
+allowed_origins = [
+    "http://localhost:3000",
+]
 
 def handler(event, context):
     ctx = {
@@ -26,8 +29,15 @@ def handler(event, context):
         #"custom": context.custom,
         #"env": context.env,
     }
+
     return {
         "statusCode": 200,
+        "headers": {
+            "Content-Type": 'application/json',
+            "Access-Control-Allow-Headers" : "Content-Type",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+            "Access-Control-Allow-Origin": "*",
+        },
         "body": json.dumps(
             {
                 "message": "hello world",

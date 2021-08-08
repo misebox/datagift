@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:experimental
+# syntax = docker/dockerfile:1.2
 
 FROM public.ecr.aws/lambda/python:3.8
 COPY requirements.txt ./
