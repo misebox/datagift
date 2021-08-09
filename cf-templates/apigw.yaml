@@ -12,6 +12,7 @@ Resources:
       Tags:
         - Key: CloudFormationArn
           Value: !Sub '${AWS::StackName}'
+
   ApiResource:
     Type: "AWS::ApiGateway::Resource"
     Properties:
@@ -20,23 +21,59 @@ Resources:
       PathPart: '{proxy+}'
       # PathPart: !FindInMap [Vars, Dev, FunctionName]
       # PathPart: !Sub "${FunctionName}"
+    DependsOn: "ApiResource"
+
   LambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       FunctionName: !FindInMap [Vars, Dev, FunctionName]
       Action: "lambda:InvokeFunction"
       Principal: "apigateway.amazonaws.com"
+
   ApiResourceMethod:
     Type: "AWS::ApiGateway::Method"
     Properties:
       RestApiId: !Ref Api
       ResourceId: !Ref ApiResource
-      AuthorizationType: None
-      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      HttpMethod: POST
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
         Uri: !Sub
           - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${FunctionName}/invocations"
           - { FunctionName: !FindInMap [Vars, Dev, FunctionName] }
-    DependsOn: "LambdaPermission"
+    DependsOn:
+      - "LambdaPermission"
+      - "ApiResource"
+
+  CorsOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref Api
+      ResourceId: !Ref ApiResource
+      HttpMethod: OPTIONS
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+    DependsOn: "ApiResource"
+
