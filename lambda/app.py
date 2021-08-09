@@ -26,7 +26,7 @@ def handler(event, context):
     }
 
     proxy = event['pathParameters']['proxy']
-    body = json.loads(event['body'])
+    body = json.loads(event['body']) if event['body'] else None
     claims = event['requestContext']['authorizer']['claims']
     params = dict(
         proxy=proxy,
