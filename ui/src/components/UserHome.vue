@@ -1,13 +1,7 @@
 <template>
-  <div>
-    <div v-show="isLoggedIn">
-      <p>
-        <button type="button" @click="clickList">ITEM LIST</button>
-      </p>
-      <p>
-        <button type="button" @click="clickGetBucket">GET</button>
-      </p>
-    </div>
+  <div v-show="isLoggedIn">
+    user info
+    <a-button> test</a-button>
   </div>
 
 </template>
@@ -31,9 +25,6 @@ defineProps({
 
 const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
 
-function clickList() {
-  router.push('item_list')
-}
 function clickGetBucket() {
   rest.getUploadingUrl({aa: 100})
   .then(res => {

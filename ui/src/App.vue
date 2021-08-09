@@ -9,14 +9,17 @@
         <button type="button" @click="clickLogin">Login</button>
       </div>
       <div v-show="isLoggedIn">
-        <button type="button" @click="router.go(-1)">Back</button>
-        <button type="button" @click="clickRefresh">Refresh</button>
-        <button type="button" @click="clickLogout">Logout</button>
+        <nav-link to="/">Home</nav-link>
+        <nav-link to="item_list">ITEM LIST</nav-link>
+        <a-button @click="clickRefresh">Refresh</a-button>
+        <a-button @click="clickLogout">Logout</a-button>
       </div>
     </div>
-    <transition name="fade">
-      <router-view></router-view>
-    </transition>
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
   </div>
 </template>
 
@@ -63,6 +66,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" >
+nav li:hover,
+nav li.router-link-active,
+nav li.router-link-exact-active {
+  background-color: indianred;
+  cursor: pointer;
+}
 
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -82,6 +91,9 @@ onBeforeUnmount(() => {
   button {
     margin: 1rem;
   }
+  a {
+    margin: 1rem;
+  }
 }
 
 img.favicon {
@@ -92,7 +104,7 @@ img.favicon {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: opacity 0.1s ease;
 }
 
 .fade-enter-from,

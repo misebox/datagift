@@ -1,8 +1,6 @@
 <template>
   <div>
-    <p>
-      <button type="button" @click="clickBack">BACK</button>
-    </p>
+    <a-button type="button" @click="clickBack">BACK</a-button>
     <div v-show="store.getters['gift/isLoading']">
         <div class="loader">
           LOADING...
@@ -14,15 +12,15 @@
     <div v-show="!store.getters['gift/isLoading']">
       {{ items.length }} files
       {{ pager.currentPage + 1 }} / {{ pager.totalPages }}
-      <button type="button" @click="clickPrev">Prev Page</button>
-      <button type="button" @click="clickNext">Next Page</button>
-      <transition-group name="fade" class="container" tag="div">
-        <div v-for="item, i in pager.pageItems" :key="i" class="row">
+      <a-button type="button" @click="clickPaging(-1)">Prev Page</a-button>
+      <a-button type="button" @click="clickPaging(+1)">Next Page</a-button>
+      <transition-group name="fade" mode="out-in" class="container" tag="div">
+        <div v-for="item, i in pager.pageItems" :key="item.etag" class="row">
           <!-- <div class="cell etag"> {{item.etag }} </div> -->
-          <div class="cell no"> {{ ('00' + (pager.currentPage * 10 + i+1)).slice(-2) }} </div>
-          <div class="cell filename"> {{item.filename}} </div>
-          <div class="cell size"> {{item.size}} <small>bytes</small></div>
-          <div class="cell last-modified"> {{item.lastModified }} </div>
+          <div :key="item.etag" class="cell no"> {{ ('00' + (pager.currentPage * 10 + i+1)).slice(-2) }} </div>
+          <div :key="item.etag" class="cell filename"> {{item.filename}} </div>
+          <div :key="item.etag" class="cell size"> {{item.size}} <small>bytes</small></div>
+          <div :key="item.etag" class="cell last-modified"> {{item.lastModified }} </div>
         </div>
       </transition-group>
     </div>
@@ -46,20 +44,24 @@ const router = useRouter();
 
 const items = computed(() => (store.getters['gift/items']))
 const pager = reactive({
+  clear: false,
   currentPage: 0,
   totalPages: computed(() => Math.ceil((items.value.length || 0) / 10)),
-  pageItems: computed(() => items.value.slice(pager.currentPage * 10, (pager.currentPage + 1) * 10)),
+  pageItems: computed(() => (
+    pager.clear
+    ? []
+    : items.value.slice(pager.currentPage * 10, (pager.currentPage + 1) * 10))
+  ),
 });
-function clickPrev() {
-  pager.currentPage = (0 < pager.currentPage)
-    ? pager.currentPage - 1
-    : pager.currentPage;
-}
-
-function clickNext() {
-  pager.currentPage = (pager.currentPage + 1 < pager.totalPages)
-    ? pager.currentPage + 1
-    : pager.currentPage;
+function clickPaging(step) {
+  const nextPage = pager.currentPage + step;
+  if (nextPage >= 0 && nextPage < pager.totalPages) {
+    pager.currentPage = nextPage;
+    pager.clear = true;
+    setTimeout(() => {
+      pager.clear = false;
+    }, 300)
+  }
 }
 
 defineProps({
@@ -132,12 +134,16 @@ onMounted(()=>{
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.5s ease;
+  transition: all 0.3s ease;
 }
 
-.fade-enter-from,
+.fade-enter-from {
+  opacity: 0;
+  transform: translateX(-10px);
+}
 .fade-leave-to {
   opacity: 0;
+  transform: translateX(10px);
 }
 
 .loader {
