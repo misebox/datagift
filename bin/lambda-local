@@ -1,0 +1,30 @@
+#!/bin/bash
+clear
+
+docker build -t ${IMAGE_TAG} lambda
+
+docker run -p 9000:8080 \
+  --env ENV_MODE=development \
+  --env BUCKET=datagift-store \
+  --env AWS_ACCESS_KEY_ID \
+  --env AWS_SECRET_ACCESS_KEY \
+  ${IMAGE_TAG}:latest \
+  >tmp/lambda-stdout 2>tmp/lambda-stderr &
+
+pid=$!
+
+http \
+  POST "http://localhost:9000/2015-03-31/functions/function/invocations" \
+  < event-local.json
+
+kill $pid
+
+echo STDOUT
+cat tmp/lambda-stdout
+
+echo STDERR
+cat tmp/lambda-stderr
+
+rm tmp/lambda-stdout
+rm tmp/lambda-stderr
+

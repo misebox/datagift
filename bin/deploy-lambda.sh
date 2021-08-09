@@ -16,10 +16,16 @@ docker build -t ${IMAGE_TAG} lambda
 docker tag ${IMAGE_TAG}:latest ${ECR_IMAGE_URI}:latest
 docker push ${ECR_IMAGE_URI}:latest
 
-DIGEST=$(aws ecr list-images --repository-name ${ECR_REPO_NAME} --out text --query 'imageIds[?imageTag==`latest`].imageDigest')
-aws lambda update-function-code --function-name ${LAMBDA_FUNC_NAME} --image-uri ${ECR_IMAGE_URI}@${DIGEST} 
+DIGEST=$( \
+  aws ecr list-images \
+  --repository-name ${ECR_REPO_NAME} \
+  --out text --query 'imageIds[?imageTag==`latest`].imageDigest'
+)
+aws lambda update-function-code \
+  --function-name ${LAMBDA_FUNC_NAME} \
+  --image-uri ${ECR_IMAGE_URI}@${DIGEST}
 sleep 3
-rm tmp/output
+tmp/output && rm tmp/output
 aws lambda invoke --function-name ${LAMBDA_FUNC_NAME} tmp/output ; cat tmp/output
 
 echo
