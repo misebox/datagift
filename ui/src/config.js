@@ -3,6 +3,7 @@ export default {
   DOMAIN: import.meta.env.VITE_DOMAIN,
   API_BASEURL: import.meta.env.VITE_API_BASEURL,
   ID_TOKEN_EXPIRES_IN: 300,
+  MIN_API_INTERVAL: 60,
   auth: {
     REGION: import.meta.env.VITE_AUTH_REGION,
     USER_POOL_ID: import.meta.env.VITE_AUTH_USER_POOL_ID,

@@ -68,5 +68,6 @@ function refreshToken({refresh_token}) {
 export default {
   authorizeCode,
   refreshToken,
-  listItems: (payload) => postApi('/list_item', payload),
+  listItems: (payload) => postApi('/store/list_items', payload),
+  getUploadingUrl: (payload) => postApi('/store/uploading_url', payload),
 };

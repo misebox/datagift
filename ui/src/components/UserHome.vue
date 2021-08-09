@@ -2,16 +2,9 @@
   <div>
     <h1>User Home</h1>
 
-    <p>
-    </p>
-    <div v-show="!isLoggedIn">
-      <button type="button" @click="clickLogin">Login</button>
-    </div>
     <div v-show="isLoggedIn">
-      <button type="button" @click="clickRefresh">Refresh</button>
-      <button type="button" @click="clickLogout">Logout</button>
       <p>
-        <button type="button" @click="clickList">LIST</button>
+        <button type="button" @click="clickList">ITEM LIST</button>
       </p>
       <p>
         <button type="button" @click="clickGetBucket">GET</button>
@@ -29,7 +22,8 @@ import {
   ref,
 } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import rest from '@/http/rest'
 
 const store = useStore();
 
@@ -37,35 +31,23 @@ defineProps({
   msg: String
 })
 
-const state = reactive({
-  count: 0,
-})
 const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
-const items = computed(() => store.getters['gift/getItems'])
 
-function clickLogin() {
-  store.dispatch('auth/jumpToAuthorize')
-}
-function clickRefresh() {
-  store.dispatch('auth/refreshToken')
-}
-function clickLogout() {
-  store.dispatch('auth/logout')
-}
 function clickList() {
-  store.dispatch('gift/getItems')
+  router.push('item_list')
 }
 function clickGetBucket() {
-  store.dispatch('gift/get')
+  rest.getUploadingUrl({aa: 100})
+  .then(res => {
+    console.log(res)
+  })
 }
 const currentRoute = useRoute();
+const router = useRouter();
 onMounted(()=>{
   const {name, meta, fullPath, params, query} = currentRoute;
 })
 </script>
 
-<style scoped>
-a {
-  color: #42b983;
-}
+<style lang="scss" scoped>
 </style>

@@ -1,6 +1,7 @@
 import * as VueRouter from 'vue-router';
 import HelloWorld from '@/components/HelloWorld.vue';
 import UserHome from '@/components/UserHome.vue';
+import ItemList from '@/components/ItemList.vue';
 import store from '@/store'
 
 const routes = [
@@ -14,6 +15,11 @@ const routes = [
     path: '/hello',
     name: 'hello',
     component: HelloWorld,
+  },
+  {
+    path: '/item_list',
+    name: 'item_list',
+    component: ItemList,
   },
 ];
 const router = VueRouter.createRouter({
@@ -29,6 +35,10 @@ router.beforeEach((to, from, next) => {
     next({query: null})
     return
   }
+  if (!store.getters['auth/isLoggedIn']) {
+    store.dispatch('auth/tryGetTokens')
+  }
+
   next()
 });
 router.afterEach((to, from) => {

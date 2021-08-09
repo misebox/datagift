@@ -1,15 +1,31 @@
 <template>
   <div>
     <img src="/favicon.ico">
+    <div v-show="!isLoggedIn">
+      <button type="button" @click="clickLogin">Login</button>
+    </div>
+    <div v-show="isLoggedIn">
+      <button type="button" @click="clickRefresh">Refresh</button>
+      <button type="button" @click="clickLogout">Logout</button>
+    </div>
     <router-view></router-view>
   </div>
 </template>
 
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import {onBeforeUnmount} from 'vue'
+import {computed, onBeforeUnmount} from 'vue'
 import store from '@/store'
 
+const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
+function clickLogin() {
+  store.dispatch('auth/jumpToAuthorize')
+}
+function clickRefresh() {
+  store.dispatch('auth/refreshToken')
+}
+function clickLogout() {
+  store.dispatch('auth/logout')
+}
 // check if tokens are about to expire every 3 minutes
 function checkTokenExpiration() {
   const expiresAt = store.getters['auth/expiresAt'];

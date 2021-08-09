@@ -30,6 +30,7 @@ const mutations = {
       state.expiresAt = new Date((new Date()).getTime() + payload.expires_in * 1000)
     }
     window.sessionStorage.removeItem('authInfo')
+    window.sessionStorage.setItem('tokens', JSON.stringify(payload))
   },
 };
 
@@ -88,8 +89,8 @@ const actions = {
     http.navigator.logout()
   },
   tryGetTokens(ctx) {
-    let item;
-    if (item = window.sessionStorage.getItem('tokens')) {
+    let item = window.sessionStorage.getItem('tokens');
+    if (item) {
       const tokens = JSON.parse(item);
       ctx.commit('setTokens', tokens)
     }
