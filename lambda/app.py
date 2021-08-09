@@ -1,10 +1,14 @@
 import json
 import boto3
 
-allowed_origins = [
-    "http://localhost:3000",
-]
 
+from datagift import store
+
+
+router = {
+    'store/uploading_url': store.generate_url_for_uploading,
+    'store/list_items': store.list_uploaded_objects,
+}
 def handler(event, context):
     ctx = {
         "get_remaining_time_in_millis": context.get_remaining_time_in_millis(),
@@ -19,32 +23,35 @@ def handler(event, context):
             "cognito_identity_id": context.identity.cognito_identity_id,
             "cognito_identity_pool_id": context.identity.cognito_identity_pool_id,
         },
-        #"client_context": {
-        #    "installation_id": context.client.installation_id,
-        #    "app_title": context.client.app_title,
-        #    "app_version_name": context.client.app_version_name,
-        #    "app_version_code": context.client.app_version_code,
-        #    "app_package_name": context.client.app_package_name,
-        #},
-        #"custom": context.custom,
-        #"env": context.env,
     }
 
+    proxy = event['pathParameters']['proxy']
+    body = json.loads(event['body'])
+    claims = event['requestContext']['authorizer']['claims']
+    params = dict(
+        proxy=proxy,
+        body=body,
+        sub=claims['sub'],
+        username=claims['cognito:username'],
+    )
+    route = router.get(proxy)
+    if route:
+        result = route(params)
+    else:
+        result = 'No route matched'
+
+    body = dict(
+        params=params,
+        **result,
+    )
     return {
         "statusCode": 200,
         "headers": {
             "Content-Type": 'application/json',
-            "Access-Control-Allow-Headers" : "Content-Type",
+            "Access-Control-Allow-Headers" : "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
             "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Origin": "http://localhost:3000",
         },
-        "body": json.dumps(
-            {
-                "message": "hello world",
-                "path": event.get('path'),
-                "event": event,
-                "context": ctx,
-            }
-        ),
+        "body": json.dumps(body),
     }
 

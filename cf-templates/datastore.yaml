@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 
+  S3 buckets for datagift service
+Mappings:
+  Vars:
+    Dev:
+      Name: "datagift-store"
+      WebBucketName: datagift-store
+      LogBucketName: datagift-store-log
+Resources:
+  DataStoreLogBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !FindInMap ['Vars', 'Dev', 'LogBucketName']
+      AccessControl: LogDeliveryWrite
+      Tags:
+        - Key: CloudFormationArn
+          Value: !Sub '${AWS::StackName}'
+
+  DataStoreBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !FindInMap ['Vars', 'Dev', 'WebBucketName']
+      # VersioningConfiguration:
+      #   Status: Enabled
+      # LifecycleConfiguration:
+      #   Rules:
+      #     - Id: NoncurrentVersionExpiration
+      #       Status: Enabled
+      #       NoncurrentVersionExpirationInDays: 7
+      LoggingConfiguration:
+        DestinationBucketName: !Ref DataStoreLogBucket
+        LogFilePrefix: s3-accesslog/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: CloudFormationArn
+          Value: !Sub '${AWS::StackName}'
+
+
