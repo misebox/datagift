@@ -1,20 +1,33 @@
 <template>
-  <div>
-    <img src="/favicon.ico">
-    <div v-show="!isLoggedIn">
-      <button type="button" @click="clickLogin">Login</button>
+  <div class="container">
+    <div class="header">
+      <img class="favicon" src="/favicon.ico">
+      <transition name="fade">
+        <h1 style="width: 18rem">{{title}}</h1>
+      </transition>
+      <div v-show="!isLoggedIn">
+        <button type="button" @click="clickLogin">Login</button>
+      </div>
+      <div v-show="isLoggedIn">
+        <button type="button" @click="router.go(-1)">Back</button>
+        <button type="button" @click="clickRefresh">Refresh</button>
+        <button type="button" @click="clickLogout">Logout</button>
+      </div>
     </div>
-    <div v-show="isLoggedIn">
-      <button type="button" @click="clickRefresh">Refresh</button>
-      <button type="button" @click="clickLogout">Logout</button>
-    </div>
-    <router-view></router-view>
+    <transition name="fade">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
 <script setup>
 import {computed, onBeforeUnmount} from 'vue'
 import store from '@/store'
+import {useRouter, useRoute} from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+let title = computed(() => (route.meta.title || ''))
 
 const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
 function clickLogin() {
@@ -49,13 +62,49 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style>
+<style lang="scss" >
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 30px;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  button {
+    margin: 1rem;
+  }
+}
+
+img.favicon {
+  width: 100px;
+  height: 100px;
+  padding: 0 1rem;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// hide scrollbar
+html::-webkit-scrollbar {
+    display:none;
+}
+html {
+    scrollbar-width: none;
 }
 </style>

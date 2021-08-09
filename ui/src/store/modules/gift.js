@@ -3,10 +3,12 @@ import config from '@/config'
 
 const state = {
   cacheExpiresAt: null,
-  items: []
+  loading: false,
+  items: [],
 };
 
 const getters = {
+  isLoading: (state) => (state.loading),
   isCacheExpired: state => {
     const now = new Date();
     if (!state.cacheExpiresAt || state.cacheExpiresAt < now) {
@@ -17,9 +19,15 @@ const getters = {
       return false
     }
   },
-  items: state => state.items,
+  items: (state) => (state.items),
 };
 const mutations = {
+  startLoading(state) {
+    state.loading = true;
+  },
+  endLoading(state) {
+    state.loading = false;
+  },
   setItems(state, items) {
     state.items = items;
     const utcnow = new Date();
@@ -30,11 +38,12 @@ const mutations = {
 
 const actions = {
   listItems(ctx) {
-    http.rest.listItems({testField:'aaa'})
-    .then(data => {
-      console.log(data)
-      ctx.commit('setItems', data.items);
-    })
+    ctx.commit('startLoading');
+    http.rest.listItems()
+      .then(data => {
+        ctx.commit('setItems', data.items);
+        ctx.commit('endLoading');
+      })
   },
 }
 

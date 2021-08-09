@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h1>User Home</h1>
-
     <div v-show="isLoggedIn">
       <p>
         <button type="button" @click="clickList">ITEM LIST</button>

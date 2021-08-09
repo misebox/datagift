@@ -9,7 +9,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: UserHome,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, title: 'USER HOME' }
   },
   {
     path: '/hello',
@@ -20,6 +20,7 @@ const routes = [
     path: '/item_list',
     name: 'item_list',
     component: ItemList,
+    meta: { requiresAuth: true, title: 'ITEM LIST' }
   },
 ];
 const router = VueRouter.createRouter({
