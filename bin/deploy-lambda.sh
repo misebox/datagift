@@ -25,7 +25,5 @@ aws lambda update-function-code \
   --function-name ${LAMBDA_FUNC_NAME} \
   --image-uri ${ECR_IMAGE_URI}@${DIGEST}
 sleep 3
-tmp/output && rm tmp/output
-aws lambda invoke --function-name ${LAMBDA_FUNC_NAME} tmp/output ; cat tmp/output
-
+call-lambda.sh
 echo

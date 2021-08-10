@@ -4,8 +4,9 @@ clear
 docker build -t ${IMAGE_TAG} lambda
 
 docker run -p 9000:8080 \
-  --env ENV_MODE=development \
-  --env BUCKET=datagift-store \
+  --env ENV_MODE=${API_ENV_MODE} \
+  --env BUCKET=${STORE_BUCKET} \
+  --env REGION=${STORE_REGION} \
   --env AWS_ACCESS_KEY_ID \
   --env AWS_SECRET_ACCESS_KEY \
   ${IMAGE_TAG}:latest \
@@ -15,7 +16,12 @@ pid=$!
 
 http \
   POST "http://localhost:9000/2015-03-31/functions/function/invocations" \
-  < event-local.json
+  < event-local.json >tmp/output
+echo "----RAW Output"
+cat tmp/output | jq .
+echo "----Response Body"
+cat tmp/output | jq -r .body | jq .
+
 
 kill $pid
 
