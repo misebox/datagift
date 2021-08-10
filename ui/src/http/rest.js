@@ -64,10 +64,10 @@ function refreshToken({refresh_token}) {
   .then((res) => (res.json()))
 }
 
-
 export default {
   authorizeCode,
   refreshToken,
   listItems: (payload) => postApi('/store/list_items', payload),
   getUploadingUrl: (payload) => postApi('/store/uploading_url', payload),
+  getUser: (payload) => postApi('/user/self'),
 };

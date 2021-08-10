@@ -44,6 +44,10 @@ const actions = {
         ctx.commit('setItems', data.items);
         ctx.commit('endLoading');
       })
+      .catch(err => {
+        console.error(err)
+        ctx.commit('endLoading');
+      })
   },
 }
 

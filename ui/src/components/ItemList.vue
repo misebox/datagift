@@ -1,6 +1,5 @@
 <template>
   <div>
-    <a-button type="button" @click="clickBack">BACK</a-button>
     <div v-show="store.getters['gift/isLoading']">
         <div class="loader">
           LOADING...
@@ -16,7 +15,6 @@
       <a-button type="button" @click="clickPaging(+1)">Next Page</a-button>
       <transition-group name="fade" mode="out-in" class="container" tag="div">
         <div v-for="item, i in pager.pageItems" :key="item.etag" class="row">
-          <!-- <div class="cell etag"> {{item.etag }} </div> -->
           <div :key="item.etag" class="cell no"> {{ ('00' + (pager.currentPage * 10 + i+1)).slice(-2) }} </div>
           <div :key="item.etag" class="cell filename"> {{item.filename}} </div>
           <div :key="item.etag" class="cell size"> {{item.size}} <small>bytes</small></div>
@@ -68,10 +66,6 @@ defineProps({
   msg: String
 })
 
-
-function clickBack() {
-  router.push('/')
-}
 function clickList() {
   store.dispatch('gift/listItems')
 }

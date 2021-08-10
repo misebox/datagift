@@ -10,6 +10,7 @@ const state = {
   accessToken: '',
   refreshToken: '',
   expiresAt: null,
+  userInfo: {},
 };
 
 const getters = {
@@ -18,6 +19,7 @@ const getters = {
   accessToken: state => (state.accessToken),
   refreshToken: state => (state.refreshToken),
   expiresAt: state => (state.expiresAt),
+  userInfo: state => (state.userInfo),
 };
 const mutations = {
   setTokens(state, payload) {
@@ -30,8 +32,28 @@ const mutations = {
       state.expiresAt = new Date((new Date()).getTime() + payload.expires_in * 1000)
     }
     window.sessionStorage.removeItem('authInfo')
-    window.sessionStorage.setItem('tokens', JSON.stringify(payload))
+    window.sessionStorage.setItem('authSession', JSON.stringify(payload))
   },
+  setUserInfo(state, payload) {
+    const {
+      sub,
+      username,
+      download_count,
+      max_item_count,
+      max_item_size,
+      plan,
+      since,
+     } = payload;
+    state.userInfo = {
+      sub,
+      username,
+      download_count,
+      max_item_count,
+      max_item_size,
+      plan,
+      since,
+    };
+  }
 };
 
 
@@ -89,11 +111,20 @@ const actions = {
     http.navigator.logout()
   },
   tryGetTokens(ctx) {
-    let item = window.sessionStorage.getItem('tokens');
+    let item = window.sessionStorage.getItem('authSession');
     if (item) {
-      const tokens = JSON.parse(item);
+      const {userInfo, ...tokens} = JSON.parse(item);
       ctx.commit('setTokens', tokens)
+      if (userInfo && userInfo.sub) {
+        ctx.commit('setUserInfo', userInfo)
+      }
     }
+  },
+  getUserInfo(ctx) {
+    http.rest.getUser()
+    .then(user => {
+      ctx.commit('setUserInfo', user)
+    })
   }
 }
 

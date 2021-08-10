@@ -1,7 +1,35 @@
 <template>
-  <div v-show="isLoggedIn">
-    user info
-    <a-button> test</a-button>
+  <div v-show="isLoggedIn && userInfo.sub">
+    <div class="container">
+      <div class="row">
+        <div class="cell label">userInfo id</div>
+        <div class="cell value"><small>{{ userInfo.sub }}</small></div>
+      </div>
+      <div class="row">
+        <div class="cell label"> userInfoname </div>
+        <div class="cell value">{{ userInfo.username }}</div>
+      </div>
+      <div class="row">
+        <div class="cell label"> download_count </div>
+        <div class="cell value">{{ userInfo.download_count }}</div>
+      </div>
+      <div class="row">
+        <div class="cell label"> max_item_count </div>
+        <div class="cell value">{{ userInfo.max_item_count }}</div>
+      </div>
+      <div class="row">
+        <div class="cell label"> max_item_size </div>
+        <div class="cell value">{{ userInfo.max_item_size }}</div>
+      </div>
+      <div class="row">
+        <div class="cell label"> plan </div>
+        <div class="cell value">{{ userInfo.plan }}</div>
+      </div>
+      <div class="row">
+        <div class="cell label"> since </div>
+        <div class="cell value">{{ userInfo.since }}</div>
+      </div>
+    </div>
   </div>
 
 </template>
@@ -19,11 +47,8 @@ import rest from '@/http/rest'
 
 const store = useStore();
 
-defineProps({
-  msg: String
-})
-
 const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
+let userInfo = computed(() => store.getters['auth/userInfo']);
 
 function clickGetBucket() {
   rest.getUploadingUrl({aa: 100})
@@ -35,8 +60,36 @@ const currentRoute = useRoute();
 const router = useRouter();
 onMounted(()=>{
   const {name, meta, fullPath, params, query} = currentRoute;
+  if (isLoggedIn.value && userInfo.value && !userInfo.value.sub) {
+    store.dispatch('auth/getUserInfo')
+  }
 })
 </script>
 
 <style lang="scss" scoped>
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+  .row {
+    display: table;
+
+    .cell {
+      display: table-cell;
+      padding: 4px;
+      vertical-align: middle;
+      background-color: #f7f7f7;
+      border: 4px solid white;
+      font-size: 0.8rem;
+      text-align: center;
+      &.label {
+        width: 120px;
+      }
+      &.value {
+        width: 240px;
+      }
+    }
+  }
+}
 </style>
