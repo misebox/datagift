@@ -3,9 +3,12 @@ import boto3
 
 
 from datagift import store
+from datagift import user
+from datagift.exceptions import DataGiftException
 
 
 router = {
+    'user/self': user.get_self_information,
     'store/uploading_url': store.generate_url_for_uploading,
     'store/list_items': store.list_uploaded_objects,
 }
@@ -34,16 +37,15 @@ def handler(event, context):
         sub=claims['sub'],
         username=claims['cognito:username'],
     )
-    route = router.get(proxy)
-    if route:
-        result = route(params)
-    else:
-        result = 'No route matched'
+    try:
+        route = router.get(proxy)
+        if route:
+            result = route(params)
+        else:
+            result = dict(message='No route matched')
+    except DataGiftException as ex:
+        result = dict(reason=ex.reason)
 
-    body = dict(
-        params=params,
-        **result,
-    )
     return {
         "statusCode": 200,
         "headers": {
@@ -52,6 +54,6 @@ def handler(event, context):
             "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
             "Access-Control-Allow-Origin": "http://localhost:3000",
         },
-        "body": json.dumps(body),
+        "body": json.dumps(result),
     }
 
