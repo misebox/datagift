@@ -106,7 +106,7 @@ const actions = {
   },
   logout() {
     console.log('LOGOUT')
-    window.sessionStorage.removeItem('tokens');
+    window.sessionStorage.removeItem('authSession');
     window.sessionStorage.removeItem('authInfo');
     http.navigator.logout()
   },

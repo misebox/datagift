@@ -6,12 +6,11 @@
         <h1 style="width: 18rem">{{title}}</h1>
       </transition>
       <div v-show="!isLoggedIn">
-        <button type="button" @click="clickLogin">Login</button>
+        <a-button type="button" @click="clickLogin">Login</a-button>
       </div>
       <div v-show="isLoggedIn">
         <nav-link to="/">Home</nav-link>
         <nav-link to="item_list">ITEM LIST</nav-link>
-        <a-button @click="clickRefresh">Refresh</a-button>
         <a-button @click="clickLogout">Logout</a-button>
       </div>
     </div>
@@ -35,9 +34,6 @@ let title = computed(() => (route.meta.title || ''))
 const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
 function clickLogin() {
   store.dispatch('auth/jumpToAuthorize')
-}
-function clickRefresh() {
-  store.dispatch('auth/refreshToken')
 }
 function clickLogout() {
   store.dispatch('auth/logout')
