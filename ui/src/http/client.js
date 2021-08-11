@@ -67,7 +67,7 @@ function request(url, {
     })
     .catch(err => {
       console.error(err.name, err.message)
-
+      reject(err)
     });
   });
 }
@@ -79,6 +79,13 @@ export default {
   post: async function (url, options={}) {
     return await request(url, {
       method: 'POST',
+      cache: 'no-cache',
+      ...options,
+    });
+  },
+  put: async function (url, options={}) {
+    return await request(url, {
+      method: 'PUT',
       cache: 'no-cache',
       ...options,
     });

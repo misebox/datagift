@@ -6,11 +6,12 @@ import endpoints from './endpoints'
 import navigator from './navigator'
 
 
-function postApi(path, jsonParams=null) {
+function postApi(path, jsonParams=null, headers={}) {
   const idToken = store.getters['auth/idToken'];
   const defaultOptions = {
     headers: {
       'Authorization': 'Bearer ' + idToken,
+      ...headers,
     },
     mode: 'cors'
   };

@@ -1,7 +1,7 @@
 import * as VueRouter from 'vue-router';
-import HelloWorld from '@/components/HelloWorld.vue';
 import UserHome from '@/components/UserHome.vue';
 import ItemList from '@/components/ItemList.vue';
+import FileUploadForm from '@/components/FileUploadForm.vue';
 import store from '@/store'
 
 const routes = [
@@ -9,12 +9,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: UserHome,
-    meta: { requiresAuth: true, title: 'USER HOME' }
-  },
-  {
-    path: '/hello',
-    name: 'hello',
-    component: HelloWorld,
+    meta: { requiresAuth: true, title: 'HOME' }
   },
   {
     path: '/item_list',
@@ -22,6 +17,12 @@ const routes = [
     component: ItemList,
     meta: { requiresAuth: true, title: 'ITEM LIST' }
   },
+  {
+    path: '/file_upload_form',
+    name: 'file_upload_form',
+    component: FileUploadForm,
+    meta: { requiresAuth: true, title: 'UPLOAD' }
+  }
 ];
 const router = VueRouter.createRouter({
   history: VueRouter.createWebHistory(),
@@ -36,7 +37,7 @@ router.beforeEach((to, from, next) => {
     next({query: null})
     return
   }
-  if (!store.getters['auth/isLoggedIn']) {
+  if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']) {
     store.dispatch('auth/tryGetTokens')
   }
 

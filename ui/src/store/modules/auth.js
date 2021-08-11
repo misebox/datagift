@@ -99,10 +99,14 @@ const actions = {
     const params = {
       refresh_token: ctx.getters['refreshToken']
     };
-    http.rest.refreshToken(params)
-    .then(data => {
-      ctx.commit('setTokens', data)
-    })
+    if (params.refreshToken) {
+      http.rest.refreshToken(params)
+      .then(data => {
+        ctx.commit('setTokens', data)
+      })
+    } else {
+      ctx.dispatch('logout')
+    }
   },
   logout() {
     console.log('LOGOUT')

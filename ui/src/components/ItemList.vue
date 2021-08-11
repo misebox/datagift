@@ -1,18 +1,22 @@
 <template>
   <div>
     <div v-show="store.getters['gift/isLoading']">
-        <div class="loader">
-          LOADING...
-          <div class="inner one"></div>
-          <div class="inner two"></div>
-          <div class="inner three"></div>
-        </div>
+      <div style="display:block; height:100px;">
+        LOADING...
+      </div>
+      <div class="loader">
+        <div class="inner one"></div>
+        <div class="inner two"></div>
+        <div class="inner three"></div>
+      </div>
     </div>
     <div v-show="!store.getters['gift/isLoading']">
       {{ items.length }} files
+      <div v-show="pager.totalPages > 1">
       {{ pager.currentPage + 1 }} / {{ pager.totalPages }}
       <a-button type="button" @click="clickPaging(-1)">Prev Page</a-button>
       <a-button type="button" @click="clickPaging(+1)">Next Page</a-button>
+      </div>
       <transition-group name="fade" mode="out-in" class="container" tag="div">
         <div v-for="item, i in pager.pageItems" :key="item.etag" class="row">
           <div :key="item.etag" class="cell no"> {{ ('00' + (pager.currentPage * 10 + i+1)).slice(-2) }} </div>
@@ -96,7 +100,7 @@ onMounted(()=>{
   margin: 0 auto;
   .row {
     display: table;
-    margin: 10px 0;
+    margin: 2px 0;
 
     .cell {
       display: table-cell;

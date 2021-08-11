@@ -1,19 +1,30 @@
 <template>
   <div class="container">
-    <HeaderMenu />
-    <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
+    <div class="header">
+      <img class="favicon" src="/favicon.ico">
+      <transition name="fade">
+        <h1 style="width: 12rem">{{title}}</h1>
       </transition>
-    </router-view>
+      <div v-show="!isLoggedIn">
+        <a-button type="button" @click="clickLogin">Login</a-button>
+      </div>
+      <div v-show="isLoggedIn">
+        <nav-link to="/">Home</nav-link>
+        <nav-link to="/file_upload_form">Upload</nav-link>
+        <nav-link to="item_list">Item List</nav-link>
+        <a-button @click="clickLogout">Logout</a-button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import {computed, onBeforeUnmount, ref} from 'vue'
 import store from '@/store'
-import HeaderMenu from '@/components/HeaderMenu.vue'
+import {useRoute} from 'vue-router'
 
+const route = useRoute();
+const title = computed(() => (route.meta.title));
 const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
 function clickLogin() {
   store.dispatch('auth/jumpToAuthorize')
@@ -21,6 +32,8 @@ function clickLogin() {
 function clickLogout() {
   store.dispatch('auth/logout')
 }
+
+
 // check if tokens are about to expire every 3 minutes
 function checkTokenExpiration() {
   const expiresAt = store.getters['auth/expiresAt'];
@@ -45,22 +58,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" >
-nav li:hover,
-nav li.router-link-active,
-nav li.router-link-exact-active {
-  background-color: indianred;
-  cursor: pointer;
-}
-
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 30px;
-}
-
 .header {
   display: flex;
   flex-direction: row;
@@ -91,13 +88,4 @@ img.favicon {
   opacity: 0;
 }
 
-// hide scrollbar
-html::-webkit-scrollbar {
-    display:none;
-}
-html {
-    scrollbar-width: none;
-}
-
 </style>
-
