@@ -5,11 +5,11 @@
       <transition name="fade">
         <h1 style="width: 12rem">{{title}}</h1>
       </transition>
+      <nav-link to="/">Home</nav-link>
       <div v-show="!isLoggedIn">
         <a-button type="button" @click="clickLogin">Login</a-button>
       </div>
       <div v-show="isLoggedIn">
-        <nav-link to="/">Home</nav-link>
         <nav-link to="/file_upload_form">Upload</nav-link>
         <nav-link to="item_list">Item List</nav-link>
         <a-button @click="clickLogout">Logout</a-button>

@@ -9,7 +9,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: UserHome,
-    meta: { requiresAuth: true, title: 'HOME' }
+    meta: { requiresAuth: false, title: 'HOME' }
   },
   {
     path: '/item_list',
@@ -39,6 +39,7 @@ router.beforeEach((to, from, next) => {
   }
   if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']) {
     store.dispatch('auth/tryGetTokens')
+    next('/')
   }
 
   next()
