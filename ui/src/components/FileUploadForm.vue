@@ -15,7 +15,6 @@
     </div>
 
     <div class="files" v-for="progress in progresses" :key="progress">
-      <hr />
       <h5 style="background-color: #ddeeff; width: 80vw;">{{ progress }}</h5>
       <transition-group name="fade" mode="in-out" tag="div" class="files-container">
         <div class="row" v-for="file in filesByProgress[progress]" :key="file.index">
@@ -24,9 +23,16 @@
             {{ ('00' + (file.index +1)).slice(-2) }}
           </div>
           <div class="cell filename">
-            <small style="opacity: .5">{{file.name}}</small>
-            <br>
-            <input type="text" v-model="file.uploadName" />
+            <template v-if="['added', 'failed'].includes(file.progress)">
+              <small style="opacity: .5">{{file.name}}</small>
+              <br>
+              <input type="text" v-model="file.uploadName" />
+            </template>
+            <template v-else>
+              <small style="opacity: .5">{{file.name}}</small>
+              <br>
+              {{file.uploadName}}
+            </template>
           </div>
           <div class="cell type">
             {{file.type}}
@@ -37,12 +43,22 @@
           <div class="cell last-modified">
             {{(new Date(file.lastModified)).toISOString() }}
           </div>
-          <div class="cell upload">
-            <a-button @click="uploadFile(file)">UPLOAD</a-button>
-          </div>
-          <div class="cell cancel">
-            <a-button @click="cancelFile(file)">CANCEL</a-button>
-          </div>
+          <template v-if="file.progress === 'added'">
+            <div class="cell upload">
+              <a-button @click="uploadFile(file)">UPLOAD</a-button>
+            </div>
+            <div class="cell cancel">
+              <a-button @click="cancelFile(file)">CANCEL</a-button>
+            </div>
+          </template>
+          <template v-if="file.progress === 'failed'">
+            <div class="cell upload">
+              <a-button @click="uploadFile(file)">RETRY</a-button>
+            </div>
+            <div class="cell cancel">
+              <a-button @click="cancelFile(file)">CANCEL</a-button>
+            </div>
+          </template>
 
         </div>
       </transition-group>
