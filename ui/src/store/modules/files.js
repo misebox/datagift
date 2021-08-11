@@ -71,6 +71,14 @@ const actions = {
           ctx.commit('markFileAs', {file, toProgress: 'failed'})
         });
     })
+    .catch(res => {
+      ctx.commit('markFileAs', {file, toProgress: 'failed'})
+      res.json()
+      .then(json => {
+        // TODO display message
+        console.error('Message: ', json.message)
+      })
+    });
   },
 
 }

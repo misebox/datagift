@@ -22,16 +22,12 @@ function postApi(path, jsonParams=null, headers={}) {
   return (
     client.post(endpoints.API_BASEURL + path, options)
     .then(res => ( res.json() ))
-    .catch(err => {
-      console.log('err:',err)
-      client.post(endpoints.API_BASEURL + '/', defaultOptions)
-      .then(res => {
-        console.log('Authorized')
-      })
-      .catch(err => {
-        console.log('Authorization failed, loggout now.', err)
-        navigator.logout()
-      })
+    .catch(res => {
+      if (res.status === 401) {
+        const args = arguments;
+        store.dispatch('auth/refreshToken')
+      }
+      throw res
     })
   )
 }

@@ -49,20 +49,10 @@ function request(url, {
     };
     fetch(url, fixedOptions)
     .then(response => {
-      if (!response.ok) {
-        if (response.status === 401) {
-          const args = arguments;
-          store.dispatch('auth/refreshToken')
-        }
-        response.json()
-        .then(err => {
-          throw new Error(err);
-        })
-        .catch(err => {
-          throw new Error(err);
-        })
-      } else {
+      if (response.ok) {
         resolve(response)
+      } else {
+        reject(response)
       }
     })
     .catch(err => {
