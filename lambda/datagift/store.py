@@ -1,3 +1,4 @@
+from datagift.exceptions import DataGiftException
 import boto3
 from botocore.client import Config
 from . import config
@@ -28,12 +29,12 @@ def s3safe_decode(safe_str):
 def generate_url_for_uploading(params):
     username = params['username']
     filename = params['body']['filename']
+    size = params['body']['size']
+    if size > 1024 * 1024 * 10:
+        raise DataGiftException(f'The item size is too large {size}')
 
     # Convert filename to safe string, instead to raise error
     safe_filename = s3safe_encode(filename)
-
-    # if re.search(r'[^a-zA-Z0-9_+-.]', filename):
-    #     raise Exception('Invalid filename')
 
     key = f'{username}/uploaded/{safe_filename}'
     s3 = boto3.client(
@@ -49,6 +50,22 @@ def generate_url_for_uploading(params):
         ExpiresIn=600,
         HttpMethod='PUT')
     return dict(url=url)
+
+
+def delete_object(params):
+    username = params['username']
+    filename = params['body']['filename']
+    # Convert filename to safe string, instead to raise error
+    safe_filename = s3safe_encode(filename)
+    key = f'{username}/uploaded/{safe_filename}'
+    s3 = boto3.client('s3', region_name='ap-northeast-1')
+    result = s3.delete_object(
+        Bucket=config.BUCKET,
+        Key=key
+    )
+    print(result)
+    return {}
+
 
 def list_uploaded_objects(params):
     username = params['username']

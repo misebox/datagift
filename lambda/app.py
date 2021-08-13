@@ -11,6 +11,7 @@ router = {
     'user/self': user.get_self_information,
     'store/uploading_url': store.generate_url_for_uploading,
     'store/list_items': store.list_uploaded_objects,
+    'store/delete_item': store.delete_object,
 }
 def handler(event, context):
     ctx = {
@@ -42,9 +43,10 @@ def handler(event, context):
         if route:
             result = route(params)
         else:
-            result = dict(message='No route matched')
+            raise DataGiftException('No route matched')
+        result['isSuccess'] = True
     except DataGiftException as ex:
-        result = dict(reason=ex.reason)
+        result = dict(isSuccess=False, reason=ex.reason)
 
     return {
         "statusCode": 200,

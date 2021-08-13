@@ -1,3 +1,4 @@
+from datagift.store import list_uploaded_objects
 import json
 import datetime
 
@@ -13,11 +14,13 @@ def create_user_info(params):
     obj = dict(
         sub=params['sub'],
         username=params['username'],
-        download_count=0,
+        downloadCount=0,
         since=now,
         plan='free',
-        max_item_count=16,
-        max_item_size=100 * 1024 * 1024,
+        maxItemCount=16,
+        maxItemSize=10 * 1024 * 1024,
+        capacity=10 * 1024 * 1024,
+        capacityUsed=0,
     )
     return obj
 
@@ -34,6 +37,11 @@ def get_self_information(params):
         )
         try:
             user_info = json.loads(obj['Body'].read().decode('utf-8'))
+            list_result = list_uploaded_objects(dict(username=params['username']))
+            total_size = 0
+            for item in list_result['items']:
+                total_size += item['size']
+            user_info['capacityUsed'] = total_size
         except json.JSONDecodeError as ex:
             raise DataGiftException(ex.msg)
     except s3.exceptions.NoSuchKey:
@@ -46,4 +54,4 @@ def get_self_information(params):
             )
         except botocore.exceptions.ClientError:
             raise DataGiftException('Failed to put initial user info')
-    return user_info
+    return dict(userInfo=user_info)
