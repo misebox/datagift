@@ -109,7 +109,7 @@ onMounted(()=>{
       background-color: #f7f7f7;
       border: 4px solid white;
       &.filename {
-        width: 200px;
+        width: 320px;
         padding: 0 16px;
         text-align: left;
       }

@@ -15,8 +15,8 @@
     </div>
 
     <div class="files" v-for="progress in progresses" :key="progress">
-      <h5 style="background-color: #ddeeff; width: 80vw;">{{ progress }}</h5>
       <transition-group name="fade" mode="in-out" tag="div" class="files-container">
+        <h5 style="background-color: #ddeeff; width: 80vw;" :key="progress">{{ progress }}</h5>
         <div class="row" v-for="file in filesByProgress[progress]" :key="file.index">
 
           <div class="cell no">
@@ -202,7 +202,7 @@ onMounted(()=>{
   transition: all 0.3s ease;
   .row {
     display: table;
-    margin: 2px 0;
+    margin: 2px auto;
 
     .cell {
       display: table-cell;

@@ -2,31 +2,31 @@
   <div v-show="isLoggedIn && userInfo.sub">
     <div class="container">
       <div class="row">
-        <div class="cell label">userInfo id</div>
+        <div class="cell label">User ID</div>
         <div class="cell value"><small>{{ userInfo.sub }}</small></div>
       </div>
       <div class="row">
-        <div class="cell label"> userInfoname </div>
+        <div class="cell label"> Username </div>
         <div class="cell value">{{ userInfo.username }}</div>
       </div>
       <div class="row">
-        <div class="cell label"> download_count </div>
+        <div class="cell label"> Download count </div>
         <div class="cell value">{{ userInfo.download_count }}</div>
       </div>
       <div class="row">
-        <div class="cell label"> max_item_count </div>
+        <div class="cell label"> Max item count </div>
         <div class="cell value">{{ userInfo.max_item_count }}</div>
       </div>
       <div class="row">
-        <div class="cell label"> max_item_size </div>
-        <div class="cell value">{{ userInfo.max_item_size }}</div>
+        <div class="cell label"> Max item size </div>
+        <div class="cell value">{{ userInfo.max_item_size }} bytes</div>
       </div>
       <div class="row">
-        <div class="cell label"> plan </div>
+        <div class="cell label"> Plan </div>
         <div class="cell value">{{ userInfo.plan }}</div>
       </div>
       <div class="row">
-        <div class="cell label"> since </div>
+        <div class="cell label"> Since </div>
         <div class="cell value">{{ userInfo.since }}</div>
       </div>
     </div>
@@ -59,8 +59,7 @@ function clickGetBucket() {
 const currentRoute = useRoute();
 const router = useRouter();
 onMounted(()=>{
-  const {name, meta, fullPath, params, query} = currentRoute;
-  if (isLoggedIn.value && userInfo.value && !userInfo.value.sub) {
+  if (isLoggedIn.value && !userInfo.value.sub) {
     store.dispatch('auth/getUserInfo')
   }
 })
