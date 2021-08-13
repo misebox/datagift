@@ -10,7 +10,15 @@ const state = {
   accessToken: '',
   refreshToken: '',
   expiresAt: null,
-  userInfo: {},
+  userInfo: {
+    sub: null,
+    username: null,
+    downloadCount: null,
+    maxItemCount: null,
+    maxItemSize: null,
+    plan: null,
+    since: null,
+  },
 };
 
 const getters = {
@@ -38,18 +46,18 @@ const mutations = {
     const {
       sub,
       username,
-      download_count,
-      max_item_count,
-      max_item_size,
+      downloadCount,
+      maxItemCount,
+      maxItemSize,
       plan,
       since,
      } = payload;
     state.userInfo = {
       sub,
       username,
-      download_count,
-      max_item_count,
-      max_item_size,
+      downloadCount,
+      maxItemCount,
+      maxItemSize,
       plan,
       since,
     };
@@ -126,8 +134,10 @@ const actions = {
   },
   getUserInfo(ctx) {
     http.rest.getUser()
-    .then(user => {
-      ctx.commit('setUserInfo', user)
+    .then(res => {
+      if (res.userInfo) {
+        ctx.commit('setUserInfo', res.userInfo)
+      }
     })
   }
 }

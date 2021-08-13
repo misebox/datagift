@@ -1,14 +1,7 @@
 <template>
   <div>
     <div v-show="store.getters['gift/isLoading']">
-      <div style="display:block; height:100px;">
-        LOADING...
-      </div>
-      <div class="loader">
-        <div class="inner one"></div>
-        <div class="inner two"></div>
-        <div class="inner three"></div>
-      </div>
+      <img src="/oval.svg" />
     </div>
     <div v-show="!store.getters['gift/isLoading']">
       {{ items.length }} files
@@ -17,12 +10,27 @@
       <a-button type="button" @click="clickPaging(-1)">Prev Page</a-button>
       <a-button type="button" @click="clickPaging(+1)">Next Page</a-button>
       </div>
-      <transition-group name="fade" mode="out-in" class="container" tag="div">
+      <transition-group name="slide" mode="out-in" class="container" tag="div">
         <div v-for="item, i in pager.pageItems" :key="item.etag" class="row">
           <div :key="item.etag" class="cell no"> {{ ('00' + (pager.currentPage * 10 + i+1)).slice(-2) }} </div>
           <div :key="item.etag" class="cell filename"> {{item.filename}} </div>
           <div :key="item.etag" class="cell size"> {{item.size}} <small>bytes</small></div>
           <div :key="item.etag" class="cell last-modified"> {{item.lastModified }} </div>
+          <div :key="item.etag" class="cell">
+            <a-button @click="clickDownload(item)">DOWNLOAD</a-button>
+          </div>
+          <div :key="item.etag" class="cell" v-if="item.progress === 'stored'">
+            <transition name="fade" mode="out-in" tag="div">
+              <a-button v-if="delIndex !== i" :key="item.etag + (delIndex===i)" @click="delIndex = i">DELETE</a-button>
+              <div v-else :key="item.etag + (delIndex===i)" >
+                <a-button @click="clickDelete(item)"><small>OK</small></a-button>
+                <a-button @click="delIndex = null"><small>CANCEL</small></a-button>
+              </div>
+            </transition>
+          </div>
+          <div :key="item.etag" class="cell" v-else>
+            <img src="/oval.svg" width="32" height="32" />
+          </div>
         </div>
       </transition-group>
     </div>
@@ -45,6 +53,7 @@ const store = useStore();
 const router = useRouter();
 
 const items = computed(() => (store.getters['gift/items']))
+const delIndex = ref(null)
 const pager = reactive({
   clear: false,
   currentPage: 0,
@@ -73,11 +82,11 @@ defineProps({
 function clickList() {
   store.dispatch('gift/listItems')
 }
-function clickGetBucket() {
-  rest.getUploadingUrl({aa: 100})
-  .then(res => {
-    console.log(res)
-  })
+function clickDownload(item) {
+  // store.dispatch('gift/downloadItem', item)
+}
+function clickDelete(item) {
+  store.dispatch('gift/deleteItem', item)
 }
 
 const currentRoute = useRoute();
@@ -103,11 +112,13 @@ onMounted(()=>{
     margin: 2px 0;
 
     .cell {
+      vertical-align: middle;
       display: table-cell;
       padding: 4px;
       text-align: center;
       background-color: #f7f7f7;
       border: 4px solid white;
+      border-radius: 8px;
       &.filename {
         width: 320px;
         padding: 0 16px;
@@ -130,71 +141,31 @@ onMounted(()=>{
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: all 0.3s ease;
+.slide-enter-active,
+.slide-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.fade-enter-from {
+.slide-enter-from {
   opacity: 0;
   transform: translateX(-10px);
 }
-.fade-leave-to {
+.slide-leave-to {
   opacity: 0;
   transform: translateX(10px);
 }
 
-.loader {
-  position: absolute;
-  left: calc(50% - 32px);
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  perspective: 800px;
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-.inner {
-  position: absolute;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;  
+.fade-enter-from {
+  opacity: 0;
 }
-
-.inner.one {
-  left: 0%;
-  top: 0%;
-  animation: rotate-one 1s linear infinite;
-  border-bottom: 3px solid #0b0be6;
-}
-
-.inner.two {
-  right: 0%;
-  top: 0%;
-  animation: rotate-two 1s linear infinite;
-  border-right: 3px solid #0b0be6;
-}
-
-.inner.three {
-  right: 0%;
-  bottom: 0%;
-  animation: rotate-three 1s linear infinite;
-  border-top: 3px solid #0b0be6;
-}
-
-@keyframes rotate-one {
-    0% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(  0deg); }
-  100% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); }
-}
-
-@keyframes rotate-two {
-    0% { transform: rotateX(50deg) rotateY(10deg) rotateZ(  0deg); }
-  100% { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); }
-}
-
-@keyframes rotate-three {
-    0% { transform: rotateX(35deg) rotateY(55deg) rotateZ(  0deg); }
-  100% { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); }
+.fade-leave-to {
+  opacity: 0;
 }
 
 </style>

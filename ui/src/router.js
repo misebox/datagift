@@ -35,14 +35,13 @@ router.beforeEach((to, from, next) => {
     const {code, state} = to.query;
     store.dispatch('auth/authorizeCode', {code})
     next({query: null})
-    return
   }
-  if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']) {
+  else if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']) {
     store.dispatch('auth/tryGetTokens')
     next('/')
+  } else {
+    next()
   }
-
-  next()
 });
 router.afterEach((to, from) => {
 });

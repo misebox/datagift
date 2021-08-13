@@ -34,9 +34,9 @@
               {{file.uploadName}}
             </template>
           </div>
-          <div class="cell type">
+          <!-- <div class="cell type">
             {{file.type}}
-          </div>
+          </div> -->
           <div class="cell size">
             {{file.size}} <small>bytes</small>
           </div>

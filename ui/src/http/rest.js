@@ -27,7 +27,13 @@ function postApi(path, jsonParams=null, headers={}) {
         const args = arguments;
         store.dispatch('auth/refreshToken')
       }
-      throw res
+      throw {isSuccess: false, reason: res.toString()}
+    })
+    .then(json => {
+      if (json.isSuccess) {
+        return json
+      }
+      throw json
     })
   )
 }
@@ -67,4 +73,5 @@ export default {
   listItems: (payload) => postApi('/store/list_items', payload),
   getUploadingUrl: (payload) => postApi('/store/uploading_url', payload),
   getUser: (payload) => postApi('/user/self'),
+  deleteItem: (payload) => postApi('/store/delete_item', payload)
 };

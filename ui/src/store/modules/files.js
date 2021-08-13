@@ -1,5 +1,5 @@
 import http from '@/http'
-import config from '@/config'
+import store from '@/store'
 
 const progressRule = {
   // fromProgress: allowedNextProgresses
@@ -58,10 +58,13 @@ const actions = {
     ctx.commit('cancelFile', file)
   },
   uploadFile(ctx, file) {
+    const userInfo = store.getters['auth/userInfo'];
+    if (!userInfo.maxItemSize || file.size > userInfo.maxItemSize) {
+      return
+    }
     ctx.commit('markFileAs', {file, toProgress: 'uploading'})
-    http.rest.getUploadingUrl({filename: file.uploadName})
+    http.rest.getUploadingUrl({filename: file.uploadName, size: file.size})
     .then(res => {
-      // http.presigned.putS3Object(res.url, file)
       http.client.put(res.url, {body: file})
         .then((response) => {
           console.log(response)
@@ -73,11 +76,9 @@ const actions = {
     })
     .catch(res => {
       ctx.commit('markFileAs', {file, toProgress: 'failed'})
-      res.json()
-      .then(json => {
-        // TODO display message
-        console.error('Message: ', json.message)
-      })
+      if (res.reason) {
+        console.error('Message: ', res.reason)
+      }
     });
   },
 

@@ -1,6 +1,6 @@
 <template>
-  <div v-show="isLoggedIn && userInfo.sub">
-    <div class="container">
+  <div>
+    <div class="container" v-if="isLoggedIn && userInfo.sub">
       <div class="row">
         <div class="cell label">User ID</div>
         <div class="cell value"><small>{{ userInfo.sub }}</small></div>
@@ -11,15 +11,15 @@
       </div>
       <div class="row">
         <div class="cell label"> Download count </div>
-        <div class="cell value">{{ userInfo.download_count }}</div>
+        <div class="cell value">{{ userInfo.downloadCount }}</div>
       </div>
       <div class="row">
         <div class="cell label"> Max item count </div>
-        <div class="cell value">{{ userInfo.max_item_count }}</div>
+        <div class="cell value">{{ userInfo.maxItemCount }}</div>
       </div>
       <div class="row">
         <div class="cell label"> Max item size </div>
-        <div class="cell value">{{ userInfo.max_item_size }} bytes</div>
+        <div class="cell value">{{ userInfo.maxItemSize }} bytes</div>
       </div>
       <div class="row">
         <div class="cell label"> Plan </div>
@@ -30,37 +30,40 @@
         <div class="cell value">{{ userInfo.since }}</div>
       </div>
     </div>
+    <div v-else-if="loading">
+      <img src="/oval.svg" />
+    </div>
+    <div v-else>
+      guest
+    </div>
   </div>
 
 </template>
 
 <script setup>
 import {
-  reactive,
   onMounted,
   computed,
+  watch,
   ref,
 } from 'vue'
 import { useStore } from 'vuex'
-import { useRoute, useRouter } from 'vue-router'
-import rest from '@/http/rest'
 
 const store = useStore();
 
 const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
 let userInfo = computed(() => store.getters['auth/userInfo']);
+let loading = ref(false);
 
-function clickGetBucket() {
-  rest.getUploadingUrl({aa: 100})
-  .then(res => {
-    console.log(res)
-  })
-}
-const currentRoute = useRoute();
-const router = useRouter();
-onMounted(()=>{
-  if (isLoggedIn.value && !userInfo.value.sub) {
+watch(() => (store.getters['auth/isLoggedIn']), (newVal, oldVal) => {
+  if (!oldVal && newVal && !userInfo.value.sub) {
+    loading.value = true;
     store.dispatch('auth/getUserInfo')
+  }
+})
+watch(loading, (newVal, oldVal) => {
+  if (oldVal && !newVal) {
+    loading = false
   }
 })
 </script>
