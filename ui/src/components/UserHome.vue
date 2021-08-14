@@ -1,5 +1,6 @@
 <template>
   <div>
+    <h1>* WORKING IN PROGRESS *</h1>
     <div class="container" v-if="isLoggedIn && userInfo.sub">
       <div class="row">
         <div class="cell label">User ID</div>
