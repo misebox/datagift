@@ -83,7 +83,7 @@ function clickList() {
   store.dispatch('gift/listItems')
 }
 function clickDownload(item) {
-  // store.dispatch('gift/downloadItem', item)
+  store.dispatch('gift/downloadItem', item)
 }
 function clickDelete(item) {
   store.dispatch('gift/deleteItem', item)

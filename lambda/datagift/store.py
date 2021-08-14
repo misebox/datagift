@@ -47,8 +47,39 @@ def generate_url_for_uploading(params):
             Bucket=config.BUCKET,
             Key=key,
         ),
-        ExpiresIn=600,
+        ExpiresIn=60,
         HttpMethod='PUT')
+    return dict(url=url)
+
+
+def generate_url_for_downloading(params):
+    username = params['username']
+    filename = params['body']['filename']
+    etag = params['body']['etag']
+
+    # Convert filename to safe string, instead to raise error
+    safe_filename = s3safe_encode(filename)
+    key = f'{username}/uploaded/{safe_filename}'
+
+    s3 = boto3.client('s3', region_name='ap-northeast-1')
+    result = s3.head_object(
+        Bucket=config.BUCKET,
+        Key=key,
+        IfMatch=etag
+    )
+    content_length = result['ContentLength']
+    if content_length > 1024 * 1024 * 10:
+        raise DataGiftException(f'The downloading size is too large {content_length}')
+
+    s3 = boto3.client('s3', region_name='ap-northeast-1')
+    url = s3.generate_presigned_url(
+        ClientMethod='get_object',
+        Params=dict(
+            Bucket=config.BUCKET,
+            Key=key,
+        ),
+        ExpiresIn=60,
+    )
     return dict(url=url)
 
 

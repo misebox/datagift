@@ -10,6 +10,7 @@ from datagift.exceptions import DataGiftException
 router = {
     'user/self': user.get_self_information,
     'store/uploading_url': store.generate_url_for_uploading,
+    'store/downloading_url': store.generate_url_for_downloading,
     'store/list_items': store.list_uploaded_objects,
     'store/delete_item': store.delete_object,
 }

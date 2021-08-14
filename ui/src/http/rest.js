@@ -72,6 +72,7 @@ export default {
   refreshToken,
   listItems: (payload) => postApi('/store/list_items', payload),
   getUploadingUrl: (payload) => postApi('/store/uploading_url', payload),
+  getDownloadingUrl: (payload) => postApi('/store/downloading_url', payload),
   getUser: (payload) => postApi('/user/self'),
   deleteItem: (payload) => postApi('/store/delete_item', payload)
 };
