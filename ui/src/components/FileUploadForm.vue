@@ -5,7 +5,7 @@
     </div>
     <div
       class="drop_area"
-      :class="{drag_over: draggingOver}"
+      :class="{ drag_over: draggingOver }"
       @dragenter="dragEnter($event)"
       @dragleave="dragLeave($event)"
       @dragover="dragOver($event)"
@@ -15,33 +15,41 @@
     </div>
 
     <div class="files" v-for="progress in progresses" :key="progress">
-      <transition-group name="fade" mode="in-out" tag="div" class="files-container">
-        <h5 style="background-color: #ddeeff; width: 80vw;" :key="progress">{{ progress }}</h5>
-        <div class="row" v-for="file in filesByProgress[progress]" :key="file.index">
-
+      <transition-group
+        name="fade"
+        mode="in-out"
+        tag="div"
+        class="files-container"
+      >
+        <h5 style="background-color: #ddeeff; width: 80vw" :key="progress">
+          {{ progress }}
+        </h5>
+        <div
+          class="row"
+          v-for="file in filesByProgress[progress]"
+          :key="file.index"
+        >
           <div class="cell no">
-            {{ ('00' + (file.index +1)).slice(-2) }}
+            {{ ('00' + (file.index + 1)).slice(-2) }}
           </div>
           <div class="cell filename">
             <template v-if="['added', 'failed'].includes(file.progress)">
-              <small style="opacity: .5">{{file.name}}</small>
-              <br>
+              <small style="opacity: 0.5">{{ file.name }}</small>
+              <br />
               <input type="text" v-model="file.uploadName" />
             </template>
             <template v-else>
-              <small style="opacity: .5">{{file.name}}</small>
-              <br>
-              {{file.uploadName}}
+              <small style="opacity: 0.5">{{ file.name }}</small>
+              <br />
+              {{ file.uploadName }}
             </template>
           </div>
           <!-- <div class="cell type">
             {{file.type}}
           </div> -->
-          <div class="cell size">
-            {{file.size}} <small>bytes</small>
-          </div>
+          <div class="cell size">{{ file.size }} <small>bytes</small></div>
           <div class="cell last-modified">
-            {{(new Date(file.lastModified)).toISOString() }}
+            {{ new Date(file.lastModified).toISOString() }}
           </div>
           <template v-if="file.progress === 'added'">
             <div class="cell upload">
@@ -59,30 +67,22 @@
               <a-button @click="cancelFile(file)">CANCEL</a-button>
             </div>
           </template>
-
         </div>
       </transition-group>
     </div>
-
   </div>
-
 </template>
 
 <script setup>
-import {
-  onMounted,
-  computed,
-  reactive,
-  ref,
-} from 'vue'
-import { useStore } from 'vuex'
-import { useRoute, useRouter } from 'vue-router'
-import rest from '@/http/rest'
+import { onMounted, computed, reactive, ref } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
+import rest from '@/http/rest';
 
 const store = useStore();
 const uploadForm = ref(null);
 
-const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
+const isLoggedIn = computed(() => store.getters['auth/isLoggedIn']);
 let userInfo = computed(() => store.getters['auth/userInfo']);
 // const filesByProgress = computed(() => (store.getters['files/filesByProgress']));
 // const files = computed(() => (store.getters['files/files']));
@@ -91,17 +91,16 @@ const progresses = ['added', 'failed', 'uploading', 'completed'];
 const filesByProgress = computed(() => {
   const result = {};
   const files = store.getters['files/filesAll'];
-  progresses.map(progress => {
-    result[progress] = files.filter(f => (f.progress === progress));
+  progresses.map((progress) => {
+    result[progress] = files.filter((f) => f.progress === progress);
   });
-  return result
+  return result;
 });
 
-
 function addFiles(event) {
-  console.log(event)
+  console.log(event);
   const files = event.target.files;
-  handleFiles(files)
+  handleFiles(files);
 }
 
 // Drag and Drop behavior
@@ -111,10 +110,10 @@ function dragEnter(event) {
   event.stopPropagation();
   event.preventDefault();
   draggingOver.value = true;
-  innerCounter ++;
+  innerCounter++;
 }
 function dragLeave(event) {
-  innerCounter --;
+  innerCounter--;
   if (innerCounter === 0) {
     draggingOver.value = false;
   }
@@ -140,30 +139,26 @@ function handleFiles(files) {
     // progress: added --> uploading --> completed | failed
     file.progress = 'added';
     fileCount++;
-    store.dispatch('files/addFile', file)
-    // filesToUpload.push(file)
-    // const reader = new FileReader();
-    // reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; }; })(img);
-    // reader.readAsDataURL(file);
+    store.dispatch('files/addFile', file);
   }
 }
 function uploadFile(file) {
-  console.log('upload file', file)
-  store.dispatch('files/uploadFile', file)
+  console.log('upload file', file);
+  store.dispatch('files/uploadFile', file);
 }
 function cancelFile(file) {
-  console.log('cancel file', file)
-  store.dispatch('files/cancelFile', file)
+  console.log('cancel file', file);
+  store.dispatch('files/cancelFile', file);
 }
 
 const currentRoute = useRoute();
 const router = useRouter();
-onMounted(()=>{
-  const {name, meta, fullPath, params, query} = currentRoute;
+onMounted(() => {
+  const { name, meta, fullPath, params, query } = currentRoute;
   if (isLoggedIn.value && userInfo.value && !userInfo.value.sub) {
-    store.dispatch('auth/getUserInfo')
+    store.dispatch('auth/getUserInfo');
   }
-})
+});
 </script>
 
 <style lang="scss" scoped>

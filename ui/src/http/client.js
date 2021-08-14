@@ -1,10 +1,10 @@
-import {fixedEncodeURIComponent} from '@/utils.js';
+import { fixedEncodeURIComponent } from '@/utils.js';
 import store from '@/store'
 
 function request(url, {
   method,
-  mode='cors',
-  cache='no-cache',
+  mode = 'cors',
+  cache = 'no-cache',
   //credentials='same-origin',
   //redirect='follow',
   //referrerPolicy='strict-origin-when-cross-origin',
@@ -48,32 +48,32 @@ function request(url, {
       ...others
     };
     fetch(url, fixedOptions)
-    .then(response => {
-      if (response.ok) {
-        resolve(response)
-      } else {
-        reject(response)
-      }
-    })
-    .catch(err => {
-      console.error(err.name, err.message)
-      reject(err)
-    });
+      .then(response => {
+        if (response.ok) {
+          resolve(response)
+        } else {
+          reject(response)
+        }
+      })
+      .catch(err => {
+        console.error(err.name, err.message)
+        reject(err)
+      });
   });
 }
 
 export default {
-  get: async function(url, options={}) {
-    return await request(url, {...options, method: 'GET'});
+  get: async function (url, options = {}) {
+    return await request(url, { ...options, method: 'GET' });
   },
-  post: async function (url, options={}) {
+  post: async function (url, options = {}) {
     return await request(url, {
       method: 'POST',
       cache: 'no-cache',
       ...options,
     });
   },
-  put: async function (url, options={}) {
+  put: async function (url, options = {}) {
     return await request(url, {
       method: 'PUT',
       cache: 'no-cache',

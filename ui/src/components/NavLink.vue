@@ -6,11 +6,11 @@
 
 <script setup="props, context">
 // Styled Router-Link
-import {defineProps} from 'vue'
+import { defineProps } from 'vue';
 const props = defineProps({
-  to: { type: String, default: '', },
-  type: { type: String, default: '', },
-  size: { type: String, default: '', }
+  to: { type: String, default: '' },
+  type: { type: String, default: '' },
+  size: { type: String, default: '' },
 });
 </script>
 
@@ -30,7 +30,4 @@ a {
   }
   transition: background-color 0.1s ease;
 }
-
-
-
 </style>

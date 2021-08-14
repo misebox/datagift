@@ -5,17 +5,17 @@
 </template>
 
 <script setup>
-import {defineProps, defineEmits, getCurrentInstance} from 'vue'
+import { defineProps, defineEmits, getCurrentInstance } from 'vue';
 
 const props = defineProps({
-  type: { type: String, default: '', },
-  size: { type: String, default: '', }
+  type: { type: String, default: '' },
+  size: { type: String, default: '' },
 });
 
 defineEmits(['click']);
-const {emit} = getCurrentInstance();
+const { emit } = getCurrentInstance();
 function click() {
-  emit("click")
+  emit('click');
 }
 </script>
 
@@ -35,7 +35,4 @@ a {
   }
   transition: background-color 0.1s ease;
 }
-
-
-
 </style>

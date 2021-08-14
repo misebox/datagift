@@ -32,9 +32,9 @@ const router = VueRouter.createRouter({
 router.beforeEach((to, from, next) => {
   console.log(to);
   if (to.query.code && to.query.state) {
-    const {code, state} = to.query;
-    store.dispatch('auth/authorizeCode', {code})
-    next({query: null})
+    const { code, state } = to.query;
+    store.dispatch('auth/authorizeCode', { code })
+    next({ query: null })
   }
   else if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']) {
     store.dispatch('auth/tryGetTokens')

@@ -10,41 +10,45 @@
 </template>
 
 <script setup>
-import {computed, onBeforeUnmount, ref} from 'vue'
-import store from '@/store'
-import HeaderMenu from '@/components/HeaderMenu.vue'
+import { computed, onBeforeUnmount, ref } from 'vue';
+import store from '@/store';
+import HeaderMenu from '@/components/HeaderMenu.vue';
 
-const isLoggedIn = computed(() => (store.getters['auth/isLoggedIn']))
+const isLoggedIn = computed(() => store.getters['auth/isLoggedIn']);
 function clickLogin() {
-  store.dispatch('auth/jumpToAuthorize')
+  store.dispatch('auth/jumpToAuthorize');
 }
 function clickLogout() {
-  store.dispatch('auth/logout')
+  store.dispatch('auth/logout');
 }
 // check if tokens are about to expire every 3 minutes
 function checkTokenExpiration() {
   const expiresAt = store.getters['auth/expiresAt'];
   if (expiresAt) {
-    const criteria = new Date((new Date()).getTime() + 5 * 60 * 1000);
+    const criteria = new Date(new Date().getTime() + 5 * 60 * 1000);
     if (expiresAt < criteria) {
       // expires in 3 mins
-      store.dispatch('auth/refreshToken')
+      store.dispatch('auth/refreshToken');
     } else {
-      console.log(`Token expires in ${Math.floor((expiresAt - criteria) / (60 * 1000))} minutes`) 
+      console.log(
+        `Token expires in ${Math.floor(
+          (expiresAt - criteria) / (60 * 1000)
+        )} minutes`
+      );
     }
   }
 }
-let timer = setInterval(checkTokenExpiration, 3 * 60 * 1000)
+let timer = setInterval(checkTokenExpiration, 3 * 60 * 1000);
 
 onBeforeUnmount(() => {
   if (timer) {
     clearInterval(timer);
     timer = null;
   }
-})
+});
 </script>
 
-<style lang="scss" >
+<style lang="scss">
 nav li:hover,
 nav li.router-link-active,
 nav li.router-link-exact-active {
@@ -93,11 +97,9 @@ img.favicon {
 
 // hide scrollbar
 html::-webkit-scrollbar {
-    display:none;
+  display: none;
 }
 html {
-    scrollbar-width: none;
+  scrollbar-width: none;
 }
-
 </style>
-

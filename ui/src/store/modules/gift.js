@@ -28,7 +28,7 @@ const mutations = {
   endLoading(state) {
     state.loading = false;
   },
-  markItemAs(state, {filename, etag, progress}) {
+  markItemAs(state, { filename, etag, progress }) {
     if (!['stored', 'deleting', 'downloading'].includes(progress)) {
       // Invalid progress
       return
@@ -41,7 +41,7 @@ const mutations = {
     }
     state.items[idx].progress = progress;
   },
-  startDeleting(state, {filename, etag}) {
+  startDeleting(state, { filename, etag }) {
     const idx = state.items.findIndex(
       it => (it.filename === filename && it.etag === etag));
     if (idx >= 0) {
@@ -55,7 +55,7 @@ const mutations = {
       state.items[idx].progress = 'stored';
     }
   },
-  deleteItem(state, {filename, etag}) {
+  deleteItem(state, { filename, etag }) {
     const idx = state.items.findIndex(
       it => (it.filename === filename && it.etag === etag));
     if (idx >= 0) {
@@ -75,7 +75,7 @@ const actions = {
     ctx.commit('startLoading');
     http.rest.listItems()
       .then(data => {
-        data.items.map(item => {item.progress = 'stored'});
+        data.items.map(item => { item.progress = 'stored' });
         ctx.commit('setItems', data.items);
         ctx.commit('endLoading');
       })
@@ -84,40 +84,40 @@ const actions = {
         ctx.commit('endLoading');
       })
   },
-  downloadItem(ctx, {filename, etag}) {
-    ctx.commit('markItemAs', {filename, etag, progress: 'downloading'})
-    http.rest.getDownloadingUrl({filename, etag})
-    .then(res => {
-      http.client.get(res.url)
-      .then(response => response.blob())
-      .then(blob => {
-        var url = window.URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+  downloadItem(ctx, { filename, etag }) {
+    ctx.commit('markItemAs', { filename, etag, progress: 'downloading' })
+    http.rest.getDownloadingUrl({ filename, etag })
+      .then(res => {
+        http.client.get(res.url)
+          .then(response => response.blob())
+          .then(blob => {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          })
+          .finally(() => {
+            ctx.commit('markItemAs', { filename, etag, progress: 'stored' })
+          });
       })
-      .finally(() => {
-        ctx.commit('markItemAs', {filename, etag, progress: 'stored'})
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      ctx.commit('markItemAs', {filename, etag, progress: 'stored'})
-    })
+      .catch(err => {
+        console.error(err);
+        ctx.commit('markItemAs', { filename, etag, progress: 'stored' })
+      })
   },
-  deleteItem(ctx, {filename, etag}) {
-    ctx.commit('markItemAs', {filename, etag, progress: 'deleting'})
-    http.rest.deleteItem({filename, etag})
-    .then(data => {
-      ctx.commit('deleteItem', {filename, etag});
-    })
-    .catch(err => {
-      console.error(err);
-      ctx.commit('markItemAs', {filename, etag, progress: 'stored'})
-    })
+  deleteItem(ctx, { filename, etag }) {
+    ctx.commit('markItemAs', { filename, etag, progress: 'deleting' })
+    http.rest.deleteItem({ filename, etag })
+      .then(data => {
+        ctx.commit('deleteItem', { filename, etag });
+      })
+      .catch(err => {
+        console.error(err);
+        ctx.commit('markItemAs', { filename, etag, progress: 'stored' })
+      })
   }
 }
 

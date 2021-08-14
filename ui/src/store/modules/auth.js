@@ -51,7 +51,7 @@ const mutations = {
       maxItemSize,
       plan,
       since,
-     } = payload;
+    } = payload;
     state.userInfo = {
       sub,
       username,
@@ -69,23 +69,23 @@ const actions = {
   jumpToAuthorize() {
     const codeVerifier = getRandomString(16);
     generateCodeChallenge(codeVerifier)
-    .then((codeChallenge) => {
-      const authInfo = {
-        state: getRandomString(16),
-        codeChallengeMethod: 'S256',
-        codeChallenge,
-        codeVerifier,
-      };
-      window.sessionStorage.setItem('authInfo', JSON.stringify(authInfo))
-      const queryParams = {
-        state: authInfo.state,
-        code_challenge_method: authInfo.codeChallengeMethod,
-        code_challenge: authInfo.codeChallenge,
-      };
-      http.navigator.login(queryParams);
-    })
+      .then((codeChallenge) => {
+        const authInfo = {
+          state: getRandomString(16),
+          codeChallengeMethod: 'S256',
+          codeChallenge,
+          codeVerifier,
+        };
+        window.sessionStorage.setItem('authInfo', JSON.stringify(authInfo))
+        const queryParams = {
+          state: authInfo.state,
+          code_challenge_method: authInfo.codeChallengeMethod,
+          code_challenge: authInfo.codeChallenge,
+        };
+        http.navigator.login(queryParams);
+      })
   },
-  authorizeCode(ctx, {code}) {
+  authorizeCode(ctx, { code }) {
     const authInfo = JSON.parse(window.sessionStorage.getItem('authInfo'));
     if (!authInfo) {
       ctx.dispatch('logout')
@@ -96,12 +96,12 @@ const actions = {
       code_verifier: authInfo.codeVerifier,
     };
     http.rest.authorizeCode(formParams)
-    .then((tokens) => {
-      ctx.commit('setTokens', tokens)
-    })
-    .catch((res) => {
-      ctx.dispatch('logout')
-    });
+      .then((tokens) => {
+        ctx.commit('setTokens', tokens)
+      })
+      .catch((res) => {
+        ctx.dispatch('logout')
+      });
   },
   refreshToken(ctx) {
     const params = {
@@ -109,9 +109,9 @@ const actions = {
     };
     if (params.refreshToken) {
       http.rest.refreshToken(params)
-      .then(data => {
-        ctx.commit('setTokens', data)
-      })
+        .then(data => {
+          ctx.commit('setTokens', data)
+        })
     } else {
       ctx.dispatch('logout')
     }
@@ -125,7 +125,7 @@ const actions = {
   tryGetTokens(ctx) {
     let item = window.sessionStorage.getItem('authSession');
     if (item) {
-      const {userInfo, ...tokens} = JSON.parse(item);
+      const { userInfo, ...tokens } = JSON.parse(item);
       ctx.commit('setTokens', tokens)
       if (userInfo && userInfo.sub) {
         ctx.commit('setUserInfo', userInfo)
@@ -134,11 +134,11 @@ const actions = {
   },
   getUserInfo(ctx) {
     http.rest.getUser()
-    .then(res => {
-      if (res.userInfo) {
-        ctx.commit('setUserInfo', res.userInfo)
-      }
-    })
+      .then(res => {
+        if (res.userInfo) {
+          ctx.commit('setUserInfo', res.userInfo)
+        }
+      })
   }
 }
 
