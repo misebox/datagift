@@ -7,6 +7,7 @@ docker run -p 9000:8080 \
   --env ENV_MODE=${API_ENV_MODE} \
   --env BUCKET=${STORE_BUCKET} \
   --env REGION=${STORE_REGION} \
+  --env ALLOWED_ORIGINS=${ALLOWED_ORIGINS} \
   --env AWS_ACCESS_KEY_ID \
   --env AWS_SECRET_ACCESS_KEY \
   ${IMAGE_TAG}:latest \

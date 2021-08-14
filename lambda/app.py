@@ -1,7 +1,6 @@
 import json
-import boto3
 
-
+from datagift import config
 from datagift import store
 from datagift import user
 from datagift.exceptions import DataGiftException
@@ -29,6 +28,17 @@ def handler(event, context):
             "cognito_identity_pool_id": context.identity.cognito_identity_pool_id,
         },
     }
+    origin = event['headers']['origin']
+    if origin not in config.ALLOWED_ORIGINS:
+        return {
+            "statusCode": 403,
+            "headers": {
+                "Content-Type": 'application/json',
+            },
+            "body": json.dumps(
+                dict(isSuccess=False, reason='Not allowed origin')
+            )
+        }
 
     proxy = event['pathParameters']['proxy']
     body = json.loads(event['body']) if event['body'] else None
@@ -55,7 +65,7 @@ def handler(event, context):
             "Content-Type": 'application/json',
             "Access-Control-Allow-Headers" : "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
             "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            "Access-Control-Allow-Origin": "http://localhost:3000",
+            "Access-Control-Allow-Origin": origin,
         },
         "body": json.dumps(result),
     }
