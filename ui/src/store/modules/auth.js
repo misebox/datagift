@@ -88,7 +88,7 @@ const actions = {
   authorizeCode(ctx, { code }) {
     const authInfo = JSON.parse(window.sessionStorage.getItem('authInfo'));
     if (!authInfo) {
-      ctx.dispatch('logout')
+      // ctx.dispatch('logout')
       return
     }
     const formParams = {

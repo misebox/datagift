@@ -1,4 +1,4 @@
-import * as VueRouter from 'vue-router';
+import { createWebHistory, createRouter } from 'vue-router';
 import UserHome from '@/components/UserHome.vue';
 import ItemList from '@/components/ItemList.vue';
 import FileUploadForm from '@/components/FileUploadForm.vue';
@@ -24,23 +24,24 @@ const routes = [
     meta: { requiresAuth: true, title: 'UPLOAD' }
   }
 ];
-const router = VueRouter.createRouter({
-  history: VueRouter.createWebHistory(),
+const router = createRouter({
+  history: createWebHistory(),
   routes,
 });
 
-router.beforeEach((to, from, next) => {
-  console.log(to);
+router.beforeEach((to, from) => {
+  console.log(to.fullPath, to.query);
+  const isLoggedIn = store.getters['auth/isLoggedIn'];
   if (to.query.code && to.query.state) {
-    const { code, state } = to.query;
-    store.dispatch('auth/authorizeCode', { code })
-    next({ query: null })
-  }
-  else if (to.meta.requiresAuth && !store.getters['auth/isLoggedIn']) {
+    if (!isLoggedIn) {
+      const { code } = to.query;
+      store.dispatch('auth/authorizeCode', { code })
+    }
+    return { query: null, replace: true }
+  } else if (to.meta.requiresAuth && !isLoggedIn) {
     store.dispatch('auth/tryGetTokens')
-    next('/')
-  } else {
-    next()
+  } else if (to.path === '/' && !isLoggedIn) {
+    store.dispatch('auth/tryGetTokens')
   }
 });
 router.afterEach((to, from) => {
