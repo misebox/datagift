@@ -10,7 +10,7 @@ from . import config
 from .exceptions import DataGiftException
 
 def create_user_info(params):
-    now = datetime.datetime.utcnow().isoformat()
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     obj = dict(
         sub=params['sub'],
         username=params['username'],
