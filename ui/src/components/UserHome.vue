@@ -50,10 +50,16 @@ const isLoggedIn = computed(() => store.getters['auth/isLoggedIn']);
 let userInfo = computed(() => store.getters['auth/userInfo']);
 let loading = ref(false);
 
+onMounted(() => {
+  if (isLoggedIn.value && !userInfo.value.sub) {
+    loading.value = true;
+    store.dispatch('auth/getUserInfo');
+  }
+})
 watch(
-  () => store.getters['auth/isLoggedIn'],
-  (newVal, oldVal) => {
-    if (!oldVal && newVal && !userInfo.value.sub) {
+  isLoggedIn,
+  (isLoggedIn, wasLoggedIn) => {
+    if (!wasLoggedIn && isLoggedIn && !userInfo.value.sub && !loading.value) {
       loading.value = true;
       store.dispatch('auth/getUserInfo');
     }

@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount } from 'vue';
 import store from '@/store';
 import HeaderMenu from '@/components/HeaderMenu.vue';
 
